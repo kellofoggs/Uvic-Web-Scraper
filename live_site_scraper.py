@@ -6,7 +6,7 @@ import requests
 from requests_html import HTMLSession
 session = HTMLSession()
 course_url = 'https://www.uvic.ca/calendar/undergrad/index.php#/courses/Syd5kOaQV?bc=true&bcCurrent=CSC205%20-%202D%20Computer%20Graphics%20and%20Image%20Processing&bcGroup=Computer%20Science%20(CSC)&bcItemType=courses'
-browser = start_chrome(course_url, headless=False)
+browser = start_chrome(course_url)
 
 html = browser.page_source
 
