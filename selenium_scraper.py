@@ -144,7 +144,7 @@ def gather_pre_reqs_wrapper(soup, pre_req_block):
         req_array.append(requirement)
 
 
-        find_pre_reqs(soup, requirement_html)
+        ##find_pre_reqs(soup, requirement_html)
 
 
 
@@ -235,11 +235,47 @@ def render_html(url):
     soup_understands = driver.page_source
     return soup_understands
 
+def get_all_class_links():
+    ##keep in selenium so webpage still interactable
+    browser_options = webdriver.EdgeOptions()
+    browser_options.headless = False
+    driver = webdriver.Edge(browser_options)
+
+
+    all_class_main_page_url = 'https://www.uvic.ca/calendar/undergrad/index.php#/courses'
+
+##Load page and wait until all buttons are loaded
+    driver.get(all_class_main_page_url)
+    driver.implicitly_wait(10)
+    ##element_present = EC.presence_of_all_elements_located((By.TAG_NAME, 'button'))
+    ##WebDriverWait(driver,timeout=10).until(element_present)
+
+    program_list = driver.find_element(By.CLASS_NAME, 'style__groups___NnCy6').find_elements(By.TAG_NAME, 'li')
+    list_of_links = []
+    for thing in program_list:
+        buttons = thing.find_element(By.TAG_NAME, 'button')
+        ##click dropdown buttons
+        button.click()
+        ##driver.implicitly_wait(2)
+        list_of_links += thing.find_elements(By.TAG_NAME, 'a')
+
+    print(len(list_of_links))
+
+
+
+    ##soup = render_html(all_class_main_page_url)
+
+    ##main_header = soup.find('')
+    return
+
+
 
 ##url = 'https://www.uvic.ca/calendar/undergrad/index.php#/courses/Syd5kOaQV?bc=true&bcCurrent=CSC205%20-%202D%20Computer%20Graphics%20and%20Image%20Processing&bcGroup=Computer%20Science%20(CSC)&bcItemType=courses '
-url = 'https://www.uvic.ca/calendar/undergrad/index.php#/courses/r1uCgFTXN?bc=true&bcCurrent=STAT261%20-%20Introduction%20to%20Probability%20and%20Statistics%20II&bcGroup=Statistics%20(STAT)&bcItemType=courses'
+'''url = 'https://www.uvic.ca/calendar/undergrad/index.php#/courses/r1uCgFTXN?bc=true&bcCurrent=STAT261%20-%20Introduction%20to%20Probability%20and%20Statistics%20II&bcGroup=Statistics%20(STAT)&bcItemType=courses'
 local_html = open('STAT261.html', 'r' )
 data = get_data(local_html)
+'''
+get_all_class_links()
 
 
 
