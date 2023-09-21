@@ -87,10 +87,19 @@ class Requirement:
         ##if (html.find('span', recursive= False) is not None):
 
         quantity = html.find('span')
-        print(self)
+        ##print(self)
         return
 
+    def print_info(self ):
+        my_info ={
+            'type': self.type,
+            'name': self.name
 
+        }
+        print(my_info)
+
+    def add_to_sub_reqs(self, element):
+        self.sub_reqs.append(element)
 
 
 class ReqType(Enum):
@@ -112,39 +121,6 @@ def determineType(requirement_html):
 
 
 
-def traverse_html_for_list(html, is_head):
-
-
-    ##print(html)
-
-
-    head_ul = html.find('ul', recursive= True)
-    head_li = html.find('li', recursive= True)
-
-    if head_ul is None and head_li is None:
-        ##print (html.name, html.text)
-        ##print(is_head)
-        return
-
-
-    ##Going down
-    if head_ul is not None:
-
-        if (head_ul.next_sibling is not None):
-            sib = head_ul.next_sibling
-            traverse_html_for_list(head_ul.next_sibling, False)
-        traverse_html_for_list(head_ul, True)
-
-
-
-    if head_li is not None:
-        ##if (head_li.next_sibling is not None):
-          ##  traverse_html_for_list(head_li.next_sibling, False)
-
-
-
-        traverse_html_for_list(head_li, True)
-    ##print(html.name, html.text)
 
 def html_trav_wrapper(html):
     global visited_set
@@ -183,22 +159,32 @@ def traverse_html_revised(html, is_head):
     ##print('sibling ul list:', sibling_ul_list)
     ##print('siling li list:', sibling_li_list)
 
+    ## case where we are at leaf node
     if ul_child is None and li_child is None:
         ##print('leaf node: ', html)
-        Requirement(html)
-        return
+        req = Requirement(html)
+        req.print_info()
+        ##print(getattr(req,'type'))
 
+        return req
+
+    ##Are there more lists nested? if so visit them
     if ul_child is not None and ( ul_child not in  visited_set) :
 
         visited_set.add(ul_child)
         traverse_html_revised(ul_child, True)
 
+    ##Are there more list elements nested? if so visit them
     if li_child is not None and ( li_child not in visited_set):
         visited_set.add(li_child)
 
         traverse_html_revised(li_child, True)
 
+    ## end of the path that doesnt end with leaf node
     print('done with path:', html)
+    req = Requirement(html)
+    return req
+
 
 
 
