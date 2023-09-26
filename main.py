@@ -78,17 +78,28 @@ class Requirement:
 class Requirement:
     type = None
     name = None
-    sub_reqs = []
+    sub_reqs = None
     quantity = 0
+    html = None
 
-    def __init__(self, html):
-        self.type = determineType(html)
+    def __init__(self, doc):
+        self.type = determineType(doc)
+        self.name = doc.text
+        self.html = doc
         ##left off here
         ##if (html.find('span', recursive= False) is not None):
 
-        quantity = html.find('span')
+        ##If not a 'req' then no need for sub reqs
+
         ##print(self)
         return
+
+    def prep_for_reqs(self):
+        return
+
+    def get_html(self):
+        return self.html
+
 
     def print_info(self ):
         my_info ={
@@ -101,6 +112,14 @@ class Requirement:
     def add_to_sub_reqs(self, element):
         self.sub_reqs.append(element)
 
+    def clean_up_quantity(self, input):
+        if self.type == ReqType.REQUIREMENTS:
+            self.sub_reqs = []
+            quantity = int(self.html.find('span').text)
+
+        if self.type == ReqType.COURSES:
+            quantity = int(self.html.find('span').text)  ##get the span element then get its text then remove the last 5 characters and remove parantheses
+
 
 class ReqType(Enum):
     REQUIREMENTS = auto()
@@ -110,10 +129,9 @@ class ReqType(Enum):
 def determineType(requirement_html):
     if requirement_html.text.__contains__('Complete', 'complete'):
         return ReqType.REQUIREMENTS
-    if requirement_html.text.__contains__():
-        return ReqType.COURSES
     if requirement_html.text.__contains__('units of') :
         return ReqType.UNITS
+    return ReqType.COURSES
 
 
 
@@ -126,7 +144,8 @@ def html_trav_wrapper(html):
     global visited_set
     visited_set = set() ##reset visited set
 
-    traverse_html_revised(html, True)
+    req_list = traverse_html_revised(html, True)
+    ##print(req_list)
 
 ##On first call html is a ul
 
@@ -135,45 +154,58 @@ def traverse_html_revised(html, is_head):
 
 
 
+
     sibling_ul_list = []
     sibling_li_list = []
 
+    sibling_req = []
 
-    ul_child = html.find('ul', recursive= True)
+
+    ##ul_child = html.find('ul', recursive= True)
     li_child = html.find('li', recursive= True)
 
 
 
     for thing in html.next_siblings:
-        if thing.name == 'ul':
-            sibling_ul_list.append(thing)
+       ## if thing.name == 'ul':
+         ##   sibling_ul_list.append(thing)
         if thing.name == 'li':
             sibling_li_list.append(thing)
 
-    for ul in sibling_ul_list:
-        traverse_html_revised(ul, False)
+    ##Uls are often requirement block
+
+
 
     for li in sibling_li_list:
-        traverse_html_revised(li, False)
+        if li not in visited_set:
+            thing_two = traverse_html_revised(li, False)
+            sibling_req.append(thing_two)
+            ##print("li list info")
+            ##thing_two.print_info()
+            ##print(thing_two)
 
     ##print('sibling ul list:', sibling_ul_list)
     ##print('siling li list:', sibling_li_list)
 
     ## case where we are at leaf node
-    if ul_child is None and li_child is None:
+    ##if ul_child is None and li_child is None:
         ##print('leaf node: ', html)
+    if li_child is None:
         req = Requirement(html)
-        req.print_info()
+        ##req.print_info()
+        print(req.get_html())
+        ##req.print_info()
         ##print(getattr(req,'type'))
 
         return req
 
+##Going downwards
     ##Are there more lists nested? if so visit them
-    if ul_child is not None and ( ul_child not in  visited_set) :
+    '''if ul_child is not None and ( ul_child not in  visited_set) :
 
         visited_set.add(ul_child)
         traverse_html_revised(ul_child, True)
-
+'''
     ##Are there more list elements nested? if so visit them
     if li_child is not None and ( li_child not in visited_set):
         visited_set.add(li_child)
@@ -181,8 +213,16 @@ def traverse_html_revised(html, is_head):
         traverse_html_revised(li_child, True)
 
     ## end of the path that doesnt end with leaf node
-    print('done with path:', html)
+    ##print('done with path:', html)
     req = Requirement(html)
+    if is_head:
+        sibling_req.insert(0, req)
+        print("sibling: req",end="")
+        for thing in sibling_req:
+            thing.print_info()
+            print(thing.get_html())
+        return sibling_req
+
     return req
 
 
