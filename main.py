@@ -4,7 +4,6 @@ import unittest
 import requests
 
 ##Offline test for html scraping, does not require selenium
-
 '''
 html_text = requests.get()
 with open('index.html') as html_file:
@@ -24,56 +23,7 @@ def read_individual_course(course):
     prereqs = []
 '''
 visited_set = None
-'''
-class Requirement:
-    from bs4 import BeautifulSoup
 
-    requirements_array = []
-    SubReqType = Enum('SubReqType', ['Courses', 'Units', 'Reqirements'])
-    the_html = None
-    requirements_head = None
-    completed = False
-    sub_reqs_to_complete = 0
-    sub_reqs = []
-    parent_array = None
-
-
-    def __init__(self,  requirements_html):
-
-        ##self.type = type
-        self.requirement_head = requirements_html.find('li')
-        ##self.requirements_array =[].append(self.requirement_head, self.requirement_head.next_siblings)
-        self.find_sub_reqs(requirements_html)
-        self.type = determineType(requirements_html)
-
-
-
-
-    
-
-    def find_sub_reqs(self, req):
-        ##for req in self.requirements_array:
-
-
-        block_head = req.find('li', recursive = True)
-        
-        sub_reqs = []
-        if (block_head is not None):
-
-            
-            sub_reqs.append(block_head)
-            first_requirement = Requirement(block_head)
-          ##  print(block_head.text)
-            for thing in block_head.next_siblings:
-                sub_reqs.append(thing)
-               ## print(thing.text)
-
-
-            for thing in sub_reqs:
-                print (thing.text)
-
-            return
-'''
 
 class Requirement:
     type = None
@@ -104,13 +54,30 @@ class Requirement:
     def print_info(self ):
         my_info ={
             'type': self.type,
-            'name': self.name
+            'name': self.name,
+            'sub reqs' : self.sub_reqs
 
         }
         print(my_info)
 
+    def return_info(self):
+        my_info = {
+            'type': self.type,
+            'name': self.name,
+            'sub reqs': self.sub_reqs
+
+        }
+        sub_reqs_string = ""
+
+
+
+
+
     def add_to_sub_reqs(self, element):
         self.sub_reqs.append(element)
+
+    def set_sub_reqs(self, in_array):
+        self.sub_reqs = in_array
 
     def clean_up_quantity(self, input):
         if self.type == ReqType.REQUIREMENTS:
@@ -144,85 +111,67 @@ def html_trav_wrapper(html):
     global visited_set
     visited_set = set() ##reset visited set
 
-    req_list = traverse_html_revised(html, True)
+    req = traverse_html_revised(html, False)
+    req.print_info()
+    return req
     ##print(req_list)
 
 ##On first call html is a ul
 
 ##Modified dfs for prereq searching
+##Returns a requirement object that holds arrays of other requirements under neath it and so on
 def traverse_html_revised(html, is_head):
 
-
-
-
-    sibling_ul_list = []
     sibling_li_list = []
-
     sibling_req = []
+    child_req_array = None
 
-
-    ##ul_child = html.find('ul', recursive= True)
     li_child = html.find('li', recursive= True)
-
-
-
     for thing in html.next_siblings:
-       ## if thing.name == 'ul':
-         ##   sibling_ul_list.append(thing)
         if thing.name == 'li':
             sibling_li_list.append(thing)
-
-    ##Uls are often requirement block
-
-
 
     for li in sibling_li_list:
         if li not in visited_set:
             thing_two = traverse_html_revised(li, False)
             sibling_req.append(thing_two)
-            ##print("li list info")
-            ##thing_two.print_info()
-            ##print(thing_two)
 
-    ##print('sibling ul list:', sibling_ul_list)
-    ##print('siling li list:', sibling_li_list)
 
     ## case where we are at leaf node
-    ##if ul_child is None and li_child is None:
-        ##print('leaf node: ', html)
     if li_child is None:
         req = Requirement(html)
         ##req.print_info()
-        print(req.get_html())
+        ##print(req.get_html())
         ##req.print_info()
         ##print(getattr(req,'type'))
 
         return req
 
-##Going downwards
-    ##Are there more lists nested? if so visit them
-    '''if ul_child is not None and ( ul_child not in  visited_set) :
 
-        visited_set.add(ul_child)
-        traverse_html_revised(ul_child, True)
-'''
+##Going downwards
+
     ##Are there more list elements nested? if so visit them
     if li_child is not None and ( li_child not in visited_set):
         visited_set.add(li_child)
 
-        traverse_html_revised(li_child, True)
+        child_req_array = traverse_html_revised(li_child, True)
+
 
     ## end of the path that doesnt end with leaf node
     ##print('done with path:', html)
     req = Requirement(html)
+
     if is_head:
         sibling_req.insert(0, req)
-        print("sibling: req",end="")
-        for thing in sibling_req:
-            thing.print_info()
-            print(thing.get_html())
+        ##print("sibling: req", end="")
+        ##for thing in sibling_req:
+            ##thing.print_info()
+            ##print(thing.get_html())
+
+        req.set_sub_reqs(child_req_array)
         return sibling_req
 
+    req.set_sub_reqs(child_req_array)
     return req
 
 
@@ -275,7 +224,7 @@ def get_data(source_html) -> list:
     ##requirements = Requirement(total_pre_reqs)
     ##traverse_html_for_list(total_pre_reqs, True)
     ##traverse_html_revised(total_pre_reqs, True)
-    html_trav_wrapper(total_pre_reqs)
+    req = html_trav_wrapper(total_pre_reqs)
     ##find_pre_reqs(soup, total_pre_reqs)
     ##sub_reqs = total_pre_reqs.find_all('li', recursive = False)
     num_required = []
@@ -295,6 +244,8 @@ def get_data(source_html) -> list:
                          "Notes": "notes"
 
                       }
+    print("\n\n\n\n" )
+    req.print_info()
 
 
 
