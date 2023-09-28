@@ -36,6 +36,10 @@ class Requirement:
         self.type = determineType(doc)
         self.name = doc.text
         self.html = doc
+
+        if self.type ==ReqType.REQUIREMENTS:
+            self.prep_for_reqs()
+
         ##left off here
         ##if (html.find('span', recursive= False) is not None):
 
@@ -45,6 +49,7 @@ class Requirement:
         return
 
     def prep_for_reqs(self):
+        self.name = "Complete"
         return
 
     def get_html(self):
@@ -58,7 +63,10 @@ class Requirement:
             'sub reqs' : self.sub_reqs
 
         }
+
         print(my_info)
+
+
 
     def return_info(self):
         my_info = {
@@ -139,13 +147,15 @@ def traverse_html_revised(html, is_head):
 
     ## case where we are at leaf node
     if li_child is None:
-        req = Requirement(html)
+        reqs = [Requirement(html)]
+        for thing in html.next_siblings:
+            reqs.append(Requirement(thing))
         ##req.print_info()
         ##print(req.get_html())
         ##req.print_info()
         ##print(getattr(req,'type'))
 
-        return req
+        return reqs
 
 
 ##Going downwards
@@ -194,6 +204,17 @@ def determineType(req_html):
 
     return ReqType.COURSES
 
+
+def traverse_reqs(req):
+    req.print_info()
+    if req.sub_reqs is not None:
+        for thing in req.sub_reqs:
+
+                traverse_reqs(thing)
+
+
+
+
 def get_data(source_html) -> list:
 
 
@@ -213,20 +234,15 @@ def get_data(source_html) -> list:
     for thing in info_array:
         section_name = thing.find(class_ ='course-view__label___FPV12').text
         infomap[section_name] = thing
-        ##print(thing,'\n')
 
-
-    ##print(infomap)
 
 
     total_pre_reqs = infomap["Prerequisites"].find('ul', recursive = True)
 
-    ##requirements = Requirement(total_pre_reqs)
-    ##traverse_html_for_list(total_pre_reqs, True)
-    ##traverse_html_revised(total_pre_reqs, True)
+
     req = html_trav_wrapper(total_pre_reqs)
-    ##find_pre_reqs(soup, total_pre_reqs)
-    ##sub_reqs = total_pre_reqs.find_all('li', recursive = False)
+
+
     num_required = []
 
 
@@ -244,8 +260,20 @@ def get_data(source_html) -> list:
                          "Notes": "notes"
 
                       }
-    print("\n\n\n\n" )
+
+    traverse_reqs(req)
+'''    print("\n\n\n\n")
     req.print_info()
+
+    for thing in req.sub_reqs:
+        thing.print_info()
+        for ting in thing.sub_reqs:
+            ting.print_info()
+
+        print("\n\n\n")
+'''
+
+
 
 
 
