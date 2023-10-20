@@ -2,6 +2,7 @@ from bs4 import BeautifulSoup
 from enum import Enum, auto
 import unittest
 import requests
+import json
 
 ##Offline test for html scraping, does not require selenium
 '''
@@ -25,6 +26,7 @@ def read_individual_course(course):
 
 # Set for DFS that is reinitialized whenever wrapper is called
 visited_set = None
+num_called = 0
 
 # Class for requirements. A requirement could be a singular class, a certain amount of units or a collection of the other 2
 class Requirement:
@@ -36,12 +38,13 @@ class Requirement:
     quantity = 0
     html = None
     my_map = {}
-    sub_maps = []
+    sub_maps = None
 
     def __init__(self, doc):
         self.type = determineType(doc)
         self.name = doc.text
         self.html = doc
+        self.sub_maps = []
 
         if self.type == ReqType.REQUIREMENTS:
             self.prep_for_reqs()
@@ -52,24 +55,29 @@ class Requirement:
             self.prep_for_units
 
 
-        if self.sub_reqs is not None and len(self.sub_reqs) > 0:
-            for req in self.sub_reqs:
-                self.sub_maps.append(req.return_info())
-                print(req.name)
 
 
-        self.my_map = {
+        '''      self.my_map = {
             'type': self.type,
             'name': self.name,
             'course_title': self.course_description,
             'sub reqs': self.sub_maps,
             'quantity': self.quantity
-        }
+        }'''
+
         ##print(self)
         return
 
-    def get_map_version(self):
-        return self.my_map
+
+
+    def set_sub_maps(self):
+        if self.sub_reqs is not None and len(self.sub_reqs) > 0:
+            ##print("I am ", self.name, "These are my subreqs:")
+
+            for requirement in self.sub_reqs:
+                ##print(requirement.return_info())
+                self.sub_maps.append(requirement.return_info())
+
 
     def prep_for_courses(self):
         hyphen_location = None
@@ -79,7 +87,7 @@ class Requirement:
         ##if self.type == ReqType.COURSES:
         course_long = []
         string_number_array = []
-        link = self.html.find('a')
+        link = self.html.find("a")
         if link is not None:
             self.name = link.text
 
@@ -101,7 +109,7 @@ class Requirement:
                     course_long.pop(len(course_long) - 1)
 
                     ##print(''.join(course_long))
-                    self.course_title = ''.join(course_long)
+                    self.course_title = "".join(course_long)
                 found_title = True
                 ##If we found the '(' before the number then we can go further into the string to look for the credit amount
                 continue
@@ -111,12 +119,17 @@ class Requirement:
                 if ord(char) in range(48, 57) or ord(char) == 46:
                     string_number_array.append(char)
                 elif ord(char) == 41:
-                    to_be_converted_to_int = ''.join(string_number_array)
+                    to_be_converted_to_int = "".join(string_number_array)
                     self.quantity = float(to_be_converted_to_int)
                     return
 
     def prep_for_reqs(self):
         self.name = "Complete"
+
+
+        ## find the quantity from the complete "of" line
+
+        self.quantity = 0
         return
 
     def prep_for_units(self):
@@ -131,39 +144,61 @@ class Requirement:
         print(my_info)
         print(self.html.text)
 
+    '''def return_info(self):
+        my_info = {
+            ##'type': self.type,
+            "name": self.name,
+            "course_title": self.course_description,
+            "sub reqs": self.sub_reqs,
+            ##'sub req names': [x in self.sub_reqs.name]
+            "sub maps": self.sub_maps,
+            "quantity": self.quantity
+
+        }
+        return my_info
+    '''
+
     def return_info(self):
         my_info = {
-            'type': self.type,
-            'name': self.name,
-            'course_title': self.course_description,
-            'sub reqs': self.sub_reqs,
-            'quantity': self.quantity
+            ##'type': self.type,
+            "name": self.name,
+            "course_title": self.course_description,
+            "quantity": self.quantity,
+
+            ##"sub reqs": self.sub_reqs,
+            ##'sub req names': [x in self.sub_reqs.name]
+            "sub maps": self.sub_maps
 
         }
 
         return my_info
 
-    def extrapolate_from_text(self):
 
-        ##C->O->M->P->L->E->T->E
-        dfa = [
+   ## def sub_reqs_to_map(self):
 
-        ]
 
     def add_to_sub_reqs(self, element):
         self.sub_reqs.append(element)
 
     def set_sub_reqs(self, in_array):
         self.sub_reqs = in_array
+        ##print(in_array)
+        ##print(self.name, self.sub_reqs)
+        ##self.my_map["sub reqs"]
+        ##self.set_sub_maps()
+
+        ##print(self.name,self, "  :", self.sub_maps)
+        self.set_sub_maps()
+        print("\n")
 
     def clean_up_quantity(self, input):
         if self.type == ReqType.REQUIREMENTS:
             self.sub_reqs = []
-            quantity = int(self.html.find('span').text)
+            quantity = int(self.html.find("span").text)
 
         if self.type == ReqType.COURSES:
             quantity = int(self.html.find(
-                'span').text)  ##get the span element then get its text then remove the last 5 characters and remove parantheses
+                "span").text)  ##get the span element then get its text then remove the last 5 characters and remove parantheses
 
 
 class ReqType(Enum):
@@ -173,9 +208,9 @@ class ReqType(Enum):
 
 
 def determineType(requirement_html):
-    if requirement_html.text.__contains__('Complete', 'complete'):
+    if requirement_html.text.__contains__("Complete", "complete"):
         return ReqType.REQUIREMENTS
-    if requirement_html.text.__contains__('units of'):
+    if requirement_html.text.__contains__("units of"):
         return ReqType.UNITS
     return ReqType.COURSES
 
@@ -198,9 +233,9 @@ def find_sub_reqs_recursive_revised(html, is_head):
     sibling_req = []
     child_req_array = []
 
-    li_child = html.find('li', recursive=True)
+    li_child = html.find("li", recursive=True)
     for thing in html.next_siblings:
-        if thing.name == 'li':
+        if thing.name == "li":
             sibling_li_list.append(thing)
 
     for li in sibling_li_list:
@@ -208,15 +243,12 @@ def find_sub_reqs_recursive_revised(html, is_head):
             thing_two = find_sub_reqs_recursive_revised(li, False)
             sibling_req.append(thing_two)
 
+    ##Can only find leaf node when going down
     ## case where we are at leaf node
     if li_child is None:
         reqs = [Requirement(html)]
         for thing in html.next_siblings:
             reqs.append(Requirement(thing))
-        ##req.print_info()
-        ##print(req.get_html())
-        ##req.print_info()
-        ##print(getattr(req,'type'))
 
         return reqs
 
@@ -233,13 +265,14 @@ def find_sub_reqs_recursive_revised(html, is_head):
     req = Requirement(html)
 
     if is_head:
+        req.set_sub_reqs(child_req_array)
+
         sibling_req.insert(0, req)
 
-        req.set_sub_reqs(child_req_array)
         return sibling_req
 
     req.set_sub_reqs(child_req_array)
-    req.my_map['sub reqs' ] = None
+    ##req.my_map['sub reqs' ] = None
     return req
 
 
@@ -250,44 +283,61 @@ class ReqType(Enum):
 
 
 def determineType(req_html):
-    if req_html.text.__contains__('Complete') or req_html.text.__contains__('complete'):
+    if req_html.text.__contains__("Complete") or req_html.text.__contains__("complete"):
         return ReqType.REQUIREMENTS
     ##if req_html.text.__contains__():
     ##   return ReqType.COURSES
-    if req_html.text.__contains__('units of'):
+    if req_html.text.__contains__("units of"):
         return ReqType.UNITS
 
     return ReqType.COURSES
 
 
 def traverse_reqs(req):
-    ##req.print_info()
-    if req.sub_reqs is not None:
+    if req.sub_reqs is not None and len(req.sub_reqs) > 0:
         for thing in req.sub_reqs:
-            traverse_reqs(thing)
+
+            ##Go down
+            sub_req = traverse_reqs(thing)
+            req.sub_maps.append(sub_req.return_info())
+            ##if sub_req is not None:
+            #print(sub_req.sub_maps)
+
+            ##req.sub_maps.append(sub_req.return_info())
+
+#    print("\n")
+    ##req.print_info()
+    return req
+
+
 
 
 def get_data(source_html) -> list:
     ##Start up beautiful soup and create a dictionary for holding different fields
-    soup = BeautifulSoup(source_html, 'lxml')
+    soup = BeautifulSoup(source_html, "lxml")
     infomap = {}
 
     ##Wait for desired elements to load then put them into a map
 
-    info_array = soup.find_all('div', class_='noBreak')
+    info_array = soup.find_all("div", class_="noBreak")
 
     ##class ="course-view__label___FPV12"
     for thing in info_array:
-        section_name = thing.find(class_='course-view__label___FPV12').text
+        section_name = thing.find(class_="course-view__label___FPV12").text
+
+
         print(section_name)
+
+
         infomap[section_name] = thing
 
 
 
-    total_pre_reqs = infomap["Prerequisites"].find('ul', recursive=True)
+    total_pre_reqs = infomap["Prerequisites"].find("ul", recursive=True)
 
     req = find_sub_reqs_wrapper(total_pre_reqs)
-    print(req.my_map)
+    req.print_info()
+    ##print(req.my_map)
 
     class_code_title_map = get_class_name(soup)
 
@@ -295,12 +345,13 @@ def get_data(source_html) -> list:
     infomap["Class description"] = class_code_title_map["class description"]
 
     num_required = []
+    ##print(traverse_reqs(req).return_info())
 
-    total_list_eles = total_pre_reqs.find('li', recursive=True).find('li', recursive=True)
+    total_list_eles = total_pre_reqs.find("li", recursive=True).find("li", recursive=True)
 
     ## for thing in total_list_eles.next_siblings:
     ## print(thing,'\n')
-
+    ##print(req.sub_reqs)
     final_info_map = {
         "CourseName": "course name",
         "Units": "units",
@@ -310,11 +361,17 @@ def get_data(source_html) -> list:
 
     }
 
-    traverse_reqs(req)
+    print("num called:", num_called)
+    with open("results.json", "w" ) as json_file:
+        json.dump(req.return_info(), json_file, indent=2)
+
+
+##traverse_reqs(req)
+   ## print(req.name,' ',req.return_info())
 
 
 def get_class_name(html) -> map:
-    class_name = html.find('div', class_= 'course-view__itemTitleAndTranslationButton___36N-_').text
+    class_name = html.find("div", class_= "course-view__itemTitleAndTranslationButton___36N-_").text
     end_of_class_num = None
     start_of_class_desc = None
     class_code = []
@@ -341,10 +398,20 @@ def get_class_name(html) -> map:
     ##class_name_and_desc = [class_name[],]
     print("\n")
     return {
-        "class code" : ''.join(class_code),
-        "class description" : ''.join(class_desc)
+        "class code" : "".join(class_code),
+        "class description" : "".join(class_desc)
         }
 
 
-local_html = open('STAT261.html', 'r')
+local_html = open("STAT261.html", "r")
 data = get_data(local_html)
+me = {"Map":
+          {"Sub map":
+                  {"sub sub map": "item"}
+              }
+      }
+
+print(me)
+##nonsense = {"piss":[]}
+
+##print(nonsense)
