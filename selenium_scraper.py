@@ -76,7 +76,7 @@ data = get_data(url)
 '''
 
 def save_html(d):
-    new_file = os.path.join("D:\pythonProject", "STAT261.html")
+    new_file = os.path.join(".", "STAT261.html")
     file = codecs.open(new_file,"w", "utf-8")
     h = d
     file.write(h)
@@ -255,7 +255,7 @@ def get_all_class_links():
     for thing in program_list:
         buttons = thing.find_element(By.TAG_NAME, 'button')
         ##click dropdown buttons
-        button.click()
+        ##button.click()
         ##driver.implicitly_wait(2)
         list_of_links += thing.find_elements(By.TAG_NAME, 'a')
 
@@ -271,11 +271,13 @@ def get_all_class_links():
 
 
 ##url = 'https://www.uvic.ca/calendar/undergrad/index.php#/courses/Syd5kOaQV?bc=true&bcCurrent=CSC205%20-%202D%20Computer%20Graphics%20and%20Image%20Processing&bcGroup=Computer%20Science%20(CSC)&bcItemType=courses '
-'''url = 'https://www.uvic.ca/calendar/undergrad/index.php#/courses/r1uCgFTXN?bc=true&bcCurrent=STAT261%20-%20Introduction%20to%20Probability%20and%20Statistics%20II&bcGroup=Statistics%20(STAT)&bcItemType=courses'
+url = 'https://www.uvic.ca/calendar/undergrad/index.php#/courses/r1uCgFTXN?bc=true&bcCurrent=STAT261%20-%20Introduction%20to%20Probability%20and%20Statistics%20II&bcGroup=Statistics%20(STAT)&bcItemType=courses'
+'''
 local_html = open('STAT261.html', 'r' )
 data = get_data(local_html)
 '''
-get_all_class_links()
+save_html(render_html(url))
+##get_all_class_links()
 
 
 

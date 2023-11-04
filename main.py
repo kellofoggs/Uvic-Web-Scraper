@@ -107,10 +107,12 @@ class Requirement:
             if not found_title:
                 if char == '(':
                     course_long.pop(len(course_long) - 1)
+                    course_long.pop(len(course_long) - 1)
 
                     ##print(''.join(course_long))
                     self.course_title = "".join(course_long)
-                found_title = True
+
+                    found_title = True
                 ##If we found the '(' before the number then we can go further into the string to look for the credit amount
                 continue
 
@@ -162,7 +164,7 @@ class Requirement:
         my_info = {
             ##'type': self.type,
             "name": self.name,
-            "course_title": self.course_description,
+            ##"course_title": self.course_title,
             "quantity": self.quantity,
 
             ##"sub reqs": self.sub_reqs,
@@ -353,9 +355,11 @@ def get_data(source_html) -> list:
     ## print(thing,'\n')
     ##print(req.sub_reqs)
     final_info_map = {
-        "CourseName": "course name",
+        "CourseName": get_class_name(soup)["class code"],
         "Units": "units",
-        "Prereqs": "prereqs",
+        "Hours":5,
+
+        "Prereqs": req.return_info(),
         "Coreqs": "coreqs",
         "Notes": "notes"
 
@@ -363,15 +367,16 @@ def get_data(source_html) -> list:
 
     print("num called:", num_called)
     with open("results.json", "w" ) as json_file:
-        json.dump(req.return_info(), json_file, indent=2)
+        ##json.dump(req.return_info(), json_file, indent=2)
+        json.dump(final_info_map, json_file, indent=2)
 
 
 ##traverse_reqs(req)
    ## print(req.name,' ',req.return_info())
 
 
-def get_class_name(html) -> map:
-    class_name = html.find("div", class_= "course-view__itemTitleAndTranslationButton___36N-_").text
+def get_class_name(soup) -> map:
+    class_name = soup.find("div", class_= "course-view__itemTitleAndTranslationButton___36N-_").text
     end_of_class_num = None
     start_of_class_desc = None
     class_code = []
