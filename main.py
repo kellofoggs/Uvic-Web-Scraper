@@ -28,6 +28,7 @@ def read_individual_course(course):
 visited_set = None
 num_called = 0
 
+
 # Class for requirements. A requirement could be a singular class, a certain amount of units or a collection of the other 2
 class Requirement:
     type = None
@@ -54,9 +55,6 @@ class Requirement:
         elif self.type == ReqType.UNITS:
             self.prep_for_units
 
-
-
-
         '''      self.my_map = {
             'type': self.type,
             'name': self.name,
@@ -68,8 +66,6 @@ class Requirement:
         ##print(self)
         return
 
-
-
     def set_sub_maps(self):
         if self.sub_reqs is not None and len(self.sub_reqs) > 0:
             ##print("I am ", self.name, "These are my subreqs:")
@@ -78,11 +74,9 @@ class Requirement:
                 ##print(requirement.return_info())
                 self.sub_maps.append(requirement.return_info())
 
-
     def prep_for_courses(self):
         hyphen_location = None
         found_title = False
-
 
         ##if self.type == ReqType.COURSES:
         course_long = []
@@ -127,7 +121,6 @@ class Requirement:
 
     def prep_for_reqs(self):
         self.name = "Complete"
-
 
         ## find the quantity from the complete "of" line
 
@@ -175,9 +168,7 @@ class Requirement:
 
         return my_info
 
-
-   ## def sub_reqs_to_map(self):
-
+    ## def sub_reqs_to_map(self):
 
     def add_to_sub_reqs(self, element):
         self.sub_reqs.append(element)
@@ -191,7 +182,7 @@ class Requirement:
 
         ##print(self.name,self, "  :", self.sub_maps)
         self.set_sub_maps()
-        print("\n")
+        ##print("\n")
 
     def clean_up_quantity(self, input):
         if self.type == ReqType.REQUIREMENTS:
@@ -298,20 +289,17 @@ def determineType(req_html):
 def traverse_reqs(req):
     if req.sub_reqs is not None and len(req.sub_reqs) > 0:
         for thing in req.sub_reqs:
-
             ##Go down
             sub_req = traverse_reqs(thing)
             req.sub_maps.append(sub_req.return_info())
             ##if sub_req is not None:
-            #print(sub_req.sub_maps)
+            # print(sub_req.sub_maps)
 
             ##req.sub_maps.append(sub_req.return_info())
 
-#    print("\n")
+    #    print("\n")
     ##req.print_info()
     return req
-
-
 
 
 def get_data(source_html) -> list:
@@ -320,96 +308,102 @@ def get_data(source_html) -> list:
     infomap = {}
 
     ##Wait for desired elements to load then put them into a map
-
     info_array = soup.find_all("div", class_="noBreak")
-
-    ##class ="course-view__label___FPV12"
     for thing in info_array:
         section_name = thing.find(class_="course-view__label___FPV12").text
 
-
         print(section_name)
-
 
         infomap[section_name] = thing
 
-
-
     total_pre_reqs = infomap["Prerequisites"].find("ul", recursive=True)
-
     req = find_sub_reqs_wrapper(total_pre_reqs)
-    req.print_info()
-    ##print(req.my_map)
 
+    ##Get the class code and class name
     class_code_title_map = get_class_name(soup)
+    hours = get_class_hours(infomap["Hours: lecture-lab-tutorial"])
+    # Not every course has coreqs so initialize as none type
+    coreqs = None
 
-    infomap["Class code"] =class_code_title_map["class code"]
-    infomap["Class description"] = class_code_title_map["class description"]
-
-    num_required = []
-    ##print(traverse_reqs(req).return_info())
-
-    total_list_eles = total_pre_reqs.find("li", recursive=True).find("li", recursive=True)
-
-    ## for thing in total_list_eles.next_siblings:
-    ## print(thing,'\n')
-    ##print(req.sub_reqs)
     final_info_map = {
-        "CourseName": get_class_name(soup)["class code"],
+        "CourseName": class_code_title_map["class code"],
+        "CourseDescription": class_code_title_map["class description"],
         "Units": "units",
-        "Hours":5,
+        "Hours": hours,
 
         "Prereqs": req.return_info(),
+        # Not every course has coreqs so initialize as
         "Coreqs": "coreqs",
-        "Notes": "notes"
+        "Notes": infomap["Note(s)"].text
 
     }
+    print(infomap["Hours: lecture-lab-tutorial"].text)
 
-    print("num called:", num_called)
-    with open("results.json", "w" ) as json_file:
+    ##print("num called:", num_called)
+    with open("results.json", "w") as json_file:
         ##json.dump(req.return_info(), json_file, indent=2)
         json.dump(final_info_map, json_file, indent=2)
 
 
 ##traverse_reqs(req)
-   ## print(req.name,' ',req.return_info())
+## print(req.name,' ',req.return_info())
+
+def get_class_notes(source_soup) -> list:
+    notes_list_head = source_soup.find("li")
+    notes_lost = []
+    while notes_list_head.fin
 
 
-def get_class_name(soup) -> map:
-    class_name = soup.find("div", class_= "course-view__itemTitleAndTranslationButton___36N-_").text
+def get_class_name(soup) -> dict:
+    class_name = soup.find("div", class_="course-view__itemTitleAndTranslationButton___36N-_").text
     end_of_class_num = None
     start_of_class_desc = None
     class_code = []
     class_desc = []
-    for i in range (0, len(class_name)):
+    for i in range(0, len(class_name)):
         ##Go up until we have found hypen
         current_char = class_name[i]
 
         if ord(current_char) == ord("-"):
-            end_of_class_num = i -1
-            start_of_class_desc = i+2
+            end_of_class_num = i - 1
+            start_of_class_desc = i + 2
             break
 
     for x in range(0, end_of_class_num):
-        #print(x)
+        # print(x)
         class_code.append(class_name[x])
-        #print(class_code[x], end= ".")
+        # print(class_code[x], end= ".")
 
-    print("\n")
+    ##print("\n")
     for y in range(start_of_class_desc, len(class_name)):
         class_desc.append(class_name[y])
 
-        #print(class_name[y], end= ".")
+        # print(class_name[y], end= ".")
     ##class_name_and_desc = [class_name[],]
-    print("\n")
+    ##print("\n")
     return {
-        "class code" : "".join(class_code),
-        "class description" : "".join(class_desc)
-        }
+        "class code": "".join(class_code),
+        "class description": "".join(class_desc)
+    }
+
+
+# Takes in the hours sections and returns a map with each section's hours required
+def get_class_hours(soup) -> dict:
+    # '<div class="course-view__pre___2VF54"><div>3-1-0</div></div>'
+    hours = soup.find(class_="course-view__pre___2VF54").text.split('-')
+    # Text in hours has following format: "lecture, lab, tutorial'
+    hours_map = {
+        "Lecture": int(hours[0]),
+        "Lab":int( hours[1]),
+        "Tutorial": int(hours[2])
+    }
+
+    return hours_map
 
 
 local_html = open("STAT261.html", "r")
 data = get_data(local_html)
+'''
 me = {"Map":
           {"Sub map":
                   {"sub sub map": "item"}
@@ -417,6 +411,4 @@ me = {"Map":
       }
 
 print(me)
-##nonsense = {"piss":[]}
-
-##print(nonsense)
+'''

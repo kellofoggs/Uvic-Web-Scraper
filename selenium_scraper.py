@@ -253,13 +253,18 @@ def get_all_class_links():
     program_list = driver.find_element(By.CLASS_NAME, 'style__groups___NnCy6').find_elements(By.TAG_NAME, 'li')
     list_of_links = []
     for thing in program_list:
-        buttons = thing.find_element(By.TAG_NAME, 'button')
+        ##Click the drop down button to get to the stuff
+        button = thing.find_element(By.TAG_NAME, 'button')
         ##click dropdown buttons
-        ##button.click()
+        button.click()
+
         ##driver.implicitly_wait(2)
         list_of_links += thing.find_elements(By.TAG_NAME, 'a')
-
+        print(thing.text)
+        ##We want to wait for all the drop down elements to load
+        ##Drop down elements have following form
     print(len(list_of_links))
+    ##for
 
 
 
@@ -276,8 +281,8 @@ url = 'https://www.uvic.ca/calendar/undergrad/index.php#/courses/r1uCgFTXN?bc=tr
 local_html = open('STAT261.html', 'r' )
 data = get_data(local_html)
 '''
-save_html(render_html(url))
-##get_all_class_links()
+##save_html(render_html(url))
+get_all_class_links()
 
 
 
