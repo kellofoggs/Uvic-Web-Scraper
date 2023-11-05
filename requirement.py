@@ -9,8 +9,7 @@ class ReqType(Enum):
 def determineType(req_html):
     if req_html.text.__contains__("Complete") or req_html.text.__contains__("complete"):
         return ReqType.REQUIREMENTS
-    ##if req_html.text.__contains__():
-    ##   return ReqType.COURSES
+
     if req_html.text.__contains__("units of"):
         return ReqType.UNITS
 
@@ -42,15 +41,6 @@ class Requirement:
         elif self.type == ReqType.UNITS:
             self.prep_for_units
 
-        '''      self.my_map = {
-            'type': self.type,
-            'name': self.name,
-            'course_title': self.course_description,
-            'sub reqs': self.sub_maps,
-            'quantity': self.quantity
-        }'''
-
-        ##print(self)
         return
 
     def set_sub_maps(self):
@@ -185,12 +175,3 @@ class ReqType(Enum):
     REQUIREMENTS = auto()
     COURSES = auto()
     UNITS = auto()
-
-
-def determineType(requirement_html):
-    if requirement_html.text.__contains__("Complete", "complete"):
-        return ReqType.REQUIREMENTS
-    if requirement_html.text.__contains__("units of"):
-        return ReqType.UNITS
-    return ReqType.COURSES
-

@@ -176,7 +176,8 @@ def get_data(source_html) -> list:
 def get_class_notes(source_soup) -> list:
     notes_list_head = source_soup.find("li")
     notes_lost = []
-    while notes_list_head.find
+    for thing in notes_list_head.next_siblings:
+        print("A")
 
 
 def get_class_name(soup) -> dict:
