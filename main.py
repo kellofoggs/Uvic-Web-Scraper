@@ -3,10 +3,10 @@ from enum import Enum, auto
 import unittest
 import requests
 import requirement
-from requirement import Requirement,ReqType
+from requirement import Requirement, ReqType
 import json
 
-##Offline test for html scraping, does not require selenium
+# Offline test for html scraping, does not require selenium
 '''
 html_text = requests.get()
 with open('index.html') as html_file:
@@ -36,21 +36,18 @@ num_called = 0
 def find_sub_reqs_wrapper(html):
     global visited_set
     visited_set = set()  ##reset visited set
-
     req = find_sub_reqs_recursive_revised(html, False)
-    ##req.print_info()
     return req
 
 
 ##On first call html is a ul
 
 ##Modified dfs for prereq searching
-##Returns a requirement object that holds arrays of other requirements under neath it and so on
+##Returns a requirement object that holds nested maps of other requirements under neath it and so on
 def find_sub_reqs_recursive_revised(html, is_head):
     sibling_li_list = []
     sibling_req = []
     child_req_array = []
-
     li_child = html.find("li", recursive=True)
     for thing in html.next_siblings:
         if thing.name == "li":
@@ -79,7 +76,6 @@ def find_sub_reqs_recursive_revised(html, is_head):
         child_req_array = find_sub_reqs_recursive_revised(li_child, True)
 
     ## end of the path that doesnt end with leaf node
-    ##print('done with path:', html)
     req = Requirement(html)
 
     if is_head:
@@ -90,25 +86,7 @@ def find_sub_reqs_recursive_revised(html, is_head):
         return sibling_req
 
     req.set_sub_reqs(child_req_array)
-    ##req.my_map['sub reqs' ] = None
     return req
-
-
-class ReqType(Enum):
-    COURSES = auto()
-    UNITS = auto()
-    REQUIREMENTS = auto()
-
-
-def determineType(req_html):
-    if req_html.text.__contains__("Complete") or req_html.text.__contains__("complete"):
-        return ReqType.REQUIREMENTS
-    ##if req_html.text.__contains__():
-    ##   return ReqType.COURSES
-    if req_html.text.__contains__("units of"):
-        return ReqType.UNITS
-
-    return ReqType.COURSES
 
 
 def traverse_reqs(req):
@@ -140,29 +118,34 @@ def get_data(source_html) -> list:
         print(section_name)
 
         infomap[section_name] = thing
-
     total_pre_reqs = infomap["Prerequisites"].find("ul", recursive=True)
     req = find_sub_reqs_wrapper(total_pre_reqs)
-
+    units = get_class_units(infomap["Units"])
     ##Get the class code and class name
     class_code_title_map = get_class_name(soup)
     hours = get_class_hours(infomap["Hours: lecture-lab-tutorial"])
     # Not every course has coreqs so initialize as none type
-    coreqs = None
 
+    coreqs = {}
+    if  "Corequisites" in infomap.keys():
+        ## If there are coreq section then look for coreqs
+        coreqs = find_sub_reqs_wrapper(infomap["Corequisites"]).find("ul", recursive=True)
+
+        print("There is no coreqs")
     final_info_map = {
         "CourseName": class_code_title_map["class code"],
         "CourseDescription": class_code_title_map["class description"],
-        "Units": "units",
+        "Units": units,
         "Hours": hours,
 
         "Prereqs": req.return_info(),
-        # Not every course has coreqs so initialize as
-        "Coreqs": "coreqs",
+        # Not every course has coreqs so initialize as empty map first
+        "Coreqs": coreqs,
         "Notes": infomap["Note(s)"].text
 
     }
     print(infomap["Hours: lecture-lab-tutorial"].text)
+
 
     ##print("num called:", num_called)
     with open("results.json", "w") as json_file:
@@ -170,8 +153,6 @@ def get_data(source_html) -> list:
         json.dump(final_info_map, json_file, indent=2)
 
 
-##traverse_reqs(req)
-## print(req.name,' ',req.return_info())
 
 def get_class_notes(source_soup) -> list:
     notes_list_head = source_soup.find("li")
@@ -179,7 +160,7 @@ def get_class_notes(source_soup) -> list:
     for thing in notes_list_head.next_siblings:
         print("A")
 
-
+# Returns a map with class code and description
 def get_class_name(soup) -> dict:
     class_name = soup.find("div", class_="course-view__itemTitleAndTranslationButton___36N-_").text
     end_of_class_num = None
@@ -215,9 +196,8 @@ def get_class_name(soup) -> dict:
 
 # Takes in the hours sections and returns a map with each section's hours required
 def get_class_hours(soup) -> dict:
-    # '<div class="course-view__pre___2VF54"><div>3-1-0</div></div>'
     hours = soup.find(class_="course-view__pre___2VF54").text.split('-')
-    # Text in hours has following format: "lecture, lab, tutorial'
+    # Text in hours has the following format: "lecture, lab, tutorial'
     hours_map = {
         "Lecture": int(hours[0]),
         "Lab":int( hours[1]),
@@ -227,14 +207,12 @@ def get_class_hours(soup) -> dict:
     return hours_map
 
 
+# Gets the amount of credits in the main class being queried
+def get_class_units(soup) -> float:
+
+    return float(soup.find(class_="style__noFade___3YZlf").text)
+
+
 local_html = open("STAT261.html", "r")
 data = get_data(local_html)
-'''
-me = {"Map":
-          {"Sub map":
-                  {"sub sub map": "item"}
-              }
-      }
 
-print(me)
-'''

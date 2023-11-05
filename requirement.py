@@ -24,9 +24,9 @@ class Requirement:
     sub_reqs = None
     quantity = 0
     html = None
-    my_map = {}
     sub_maps = None
 
+    # Constructor for requirement call
     def __init__(self, doc):
         self.type = determineType(doc)
         self.name = doc.text
@@ -41,33 +41,27 @@ class Requirement:
         elif self.type == ReqType.UNITS:
             self.prep_for_units
 
-        return
-
     def set_sub_maps(self):
         if self.sub_reqs is not None and len(self.sub_reqs) > 0:
-            ##print("I am ", self.name, "These are my subreqs:")
-
             for requirement in self.sub_reqs:
-                ##print(requirement.return_info())
                 self.sub_maps.append(requirement.return_info())
+        self.clean_up_quantity(self.html)
 
+    # Gets the name units and description of a course
     def prep_for_courses(self):
         hyphen_location = None
         found_title = False
 
-        ##if self.type == ReqType.COURSES:
         course_long = []
         string_number_array = []
         link = self.html.find("a")
         if link is not None:
             self.name = link.text
 
-        ##found_hyphen = False
         for i in range(0, len(self.html.text)):
             char = self.html.text[i]
             ##When we find char we can start looking at text after it
             if char == '-':
-                ##found_hyphen = True
                 hyphen_location = i
                 break
 
@@ -80,11 +74,10 @@ class Requirement:
                     course_long.pop(len(course_long) - 1)
                     course_long.pop(len(course_long) - 1)
 
-                    ##print(''.join(course_long))
                     self.course_title = "".join(course_long)
 
                     found_title = True
-                ##If we found the '(' before the number then we can go further into the string to look for the credit amount
+                # If we found the '(' before the number then we can go further into the string to look for the credit amount
                 continue
 
             ##Find the credits that the course has
@@ -95,6 +88,7 @@ class Requirement:
                     to_be_converted_to_int = "".join(string_number_array)
                     self.quantity = float(to_be_converted_to_int)
                     return
+
 
     def prep_for_reqs(self):
         self.name = "Complete"
@@ -116,19 +110,7 @@ class Requirement:
         print(my_info)
         print(self.html.text)
 
-    '''def return_info(self):
-        my_info = {
-            ##'type': self.type,
-            "name": self.name,
-            "course_title": self.course_description,
-            "sub reqs": self.sub_reqs,
-            ##'sub req names': [x in self.sub_reqs.name]
-            "sub maps": self.sub_maps,
-            "quantity": self.quantity
 
-        }
-        return my_info
-    '''
 
     def return_info(self):
         my_info = {
@@ -152,19 +134,25 @@ class Requirement:
 
     def set_sub_reqs(self, in_array):
         self.sub_reqs = in_array
-        ##print(in_array)
-        ##print(self.name, self.sub_reqs)
-        ##self.my_map["sub reqs"]
-        ##self.set_sub_maps()
-
-        ##print(self.name,self, "  :", self.sub_maps)
         self.set_sub_maps()
-        ##print("\n")
 
-    def clean_up_quantity(self, input):
+    def clean_up_quantity(self, soup):
         if self.type == ReqType.REQUIREMENTS:
             self.sub_reqs = []
-            quantity = int(self.html.find("span").text)
+            search_array = soup.text.split(' ')
+            location_of_quant = 0
+            for i in range(0, len(search_array)):
+                if search_array[i].__contains__("of"):
+                    location_of_quant = i-1
+                    break
+
+            if search_array[location_of_quant] == "all":
+                self.quantity = float(len(self.sub_maps))
+
+            else:
+                self.quantity = float(search_array[location_of_quant])
+
+
 
         if self.type == ReqType.COURSES:
             quantity = int(self.html.find(
