@@ -1,12 +1,13 @@
 from enum import Enum, auto
 
+
 class ReqType(Enum):
     COURSES = auto()
     UNITS = auto()
     REQUIREMENTS = auto()
 
 
-def determineType(req_html):
+def determine_type(req_html):
     if req_html.text.__contains__("Complete") or req_html.text.__contains__("complete"):
         return ReqType.REQUIREMENTS
 
@@ -14,8 +15,12 @@ def determineType(req_html):
         return ReqType.UNITS
 
     return ReqType.COURSES
+'''
+# Class for requirements. A requirement could be a singular class, a certain amount of 
+units or a collection of the other 2
+'''
 
-# Class for requirements. A requirement could be a singular class, a certain amount of units or a collection of the other 2
+
 class Requirement:
     type = None
     course_title = None
@@ -28,7 +33,7 @@ class Requirement:
 
     # Constructor for requirement call
     def __init__(self, doc):
-        self.type = determineType(doc)
+        self.type = determine_type(doc)
         self.name = doc.text
         self.html = doc
         self.sub_maps = []
@@ -93,9 +98,9 @@ class Requirement:
     def prep_for_reqs(self):
         self.name = "Complete"
 
-        ## find the quantity from the complete "of" line
+        # find the quantity from the complete "of" line
 
-        self.quantity = 0
+        ##self.quantity = 0
         return
 
     def prep_for_units(self):

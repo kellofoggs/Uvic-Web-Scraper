@@ -4,6 +4,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 from enum import Enum, auto
 import codecs
+from requirement import Requirement, ReqType
 
 
 import os
@@ -147,73 +148,6 @@ def gather_pre_reqs_wrapper(soup, pre_req_block):
         ##find_pre_reqs(soup, requirement_html)
 
 
-
-
-
-
-##Treating the html as a tree we find the height of the prereq subtree
-def find_level(soup, pre_req_block, level):
-
-
-
-    if (pre_req_block.find_all('ul') is not None):
-        parent_list = pre_req_block.find_all('ul')
-        children_list = pre_req_block.find_all('ul')
-
-
-
-class Requirement:
-
-    requirements_array = []
-    SubReqType = Enum('SubReqType', ['Courses', 'Units', 'Reqirements'])
-    requirements_head = None
-    completed = False
-    sub_reqs_to_complete = 0
-    sub_reqs = []
-    parent_array = None
-
-
-    def __init__(self, type, requirements_html, parent_array):
-
-        ##self.type = type
-        self.requirement_head = requirements_html.find('li')
-        self.requirements_array =[].append(self.requirement_head, self.requirement_head.next_siblings)
-        self.find_sub_reqs()
-
-
-
-
-
-    def find_sub_reqs(requirement):
-        ##for req in self.requirements_array:
-
-
-        block_head = requirement.find('li', recursive = True)
-
-        sub_reqs = []
-        sub_reqs.append(block_head)
-        if (block_head is not None):
-            first_requirement = Requirement(block_head)
-
-            for thing in block_head.next_siblings:
-                sub_reqs.append(thing)
-
-
-            return
-
-
-class ReqType(Enum):
-    COURSES = auto()
-    UNITS = auto()
-    REQUIREMENTS = auto()
-
-def determineType(requirement_html):
-    if requirement_html.text.__contains__('Complete', 'complete'):
-        return ReqType.REQUIREMENTS
-    if requirement_html.text.__contains__():
-        return ReqType.COURSES
-    if requirement_html.text.__contains__('units of') :
-        return ReqType.UNITS
 
 
 

@@ -6,6 +6,7 @@ import requirement
 from requirement import Requirement, ReqType
 import json
 
+# Test with CSC 205
 # Offline test for html scraping, does not require selenium
 '''
 html_text = requests.get()
@@ -118,34 +119,39 @@ def get_data(source_html) -> list:
         print(section_name)
 
         infomap[section_name] = thing
+
+    coreqs = {}
     total_pre_reqs = infomap["Prerequisites"].find("ul", recursive=True)
+
     req = find_sub_reqs_wrapper(total_pre_reqs)
     units = get_class_units(infomap["Units"])
     ##Get the class code and class name
     class_code_title_map = get_class_name(soup)
     hours = get_class_hours(infomap["Hours: lecture-lab-tutorial"])
     # Not every course has coreqs so initialize as none type
+    course_description = get_class_description(infomap["Description"])
+    department = get_departments(infomap["Course offered by"])
 
-    coreqs = {}
-    if  "Corequisites" in infomap.keys():
+    if "Pre- or corequisites" in infomap.keys():
         ## If there are coreq section then look for coreqs
         coreqs = find_sub_reqs_wrapper(infomap["Corequisites"]).find("ul", recursive=True)
-
         print("There is no coreqs")
     final_info_map = {
-        "CourseName": class_code_title_map["class code"],
-        "CourseDescription": class_code_title_map["class description"],
+        "CourseCode": class_code_title_map["class code"],
+        "CourseName": class_code_title_map["class name"],
+        "CourseDescription": course_description,
         "Units": units,
         "Hours": hours,
+        "Notes": infomap["Note(s)"].text,
+        "Department":department,
 
         "Prereqs": req.return_info(),
         # Not every course has coreqs so initialize as empty map first
-        "Coreqs": coreqs,
-        "Notes": infomap["Note(s)"].text
+        "Coreqs": coreqs
 
     }
-    print(infomap["Hours: lecture-lab-tutorial"].text)
-
+    #print(infomap["Hours: lecture-lab-tutorial"].text)
+    print(infomap["Description"].find("div").text)
 
     ##print("num called:", num_called)
     with open("results.json", "w") as json_file:
@@ -160,11 +166,14 @@ def get_class_notes(source_soup) -> list:
     for thing in notes_list_head.next_siblings:
         print("A")
 
+def get_class_description (description) -> str:
+    return description.find("div").text
+
 # Returns a map with class code and description
 def get_class_name(soup) -> dict:
     class_name = soup.find("div", class_="course-view__itemTitleAndTranslationButton___36N-_").text
     end_of_class_num = None
-    start_of_class_desc = None
+    start_of_class_name = None
     class_code = []
     class_desc = []
     for i in range(0, len(class_name)):
@@ -173,24 +182,19 @@ def get_class_name(soup) -> dict:
 
         if ord(current_char) == ord("-"):
             end_of_class_num = i - 1
-            start_of_class_desc = i + 2
+            start_of_class_name = i + 2
             break
 
     for x in range(0, end_of_class_num):
-        # print(x)
         class_code.append(class_name[x])
-        # print(class_code[x], end= ".")
 
     ##print("\n")
-    for y in range(start_of_class_desc, len(class_name)):
+    for y in range(start_of_class_name, len(class_name)):
         class_desc.append(class_name[y])
 
-        # print(class_name[y], end= ".")
-    ##class_name_and_desc = [class_name[],]
-    ##print("\n")
     return {
         "class code": "".join(class_code),
-        "class description": "".join(class_desc)
+        "class name": "".join(class_desc)
     }
 
 
@@ -211,7 +215,8 @@ def get_class_hours(soup) -> dict:
 def get_class_units(soup) -> float:
 
     return float(soup.find(class_="style__noFade___3YZlf").text)
-
+def get_departments(soup) ->str():
+    return soup.find("div").text
 
 local_html = open("STAT261.html", "r")
 data = get_data(local_html)
