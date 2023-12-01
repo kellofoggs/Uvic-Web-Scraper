@@ -109,6 +109,8 @@ def traverse_reqs(req):
 def get_data(source_html) -> list:
     ##Start up beautiful soup and create a dictionary for holding different fields
     soup = BeautifulSoup(source_html, "lxml")
+    source_html.close()
+
     infomap = {}
 
     ##Wait for desired elements to load then put them into a map
@@ -134,20 +136,20 @@ def get_data(source_html) -> list:
 
     if "Pre- or corequisites" in infomap.keys():
         ## If there are coreq section then look for coreqs
-        coreqs = find_sub_reqs_wrapper(infomap["Corequisites"]).find("ul", recursive=True)
-        print("There is no coreqs")
+        coreqs = find_sub_reqs_wrapper(infomap["Pre- or corequisites"].find("ul", recursive=True))
+        ##print("There is no coreqs")
     final_info_map = {
         "CourseCode": class_code_title_map["class code"],
         "CourseName": class_code_title_map["class name"],
         "CourseDescription": course_description,
         "Units": units,
         "Hours": hours,
-        "Notes": infomap["Note(s)"].text,
+        #"Notes": infomap["Note(s)"].text,
         "Department":department,
 
         "Prereqs": req.return_info(),
         # Not every course has coreqs so initialize as empty map first
-        "Coreqs": coreqs
+        "Coreqs": coreqs.return_info()
 
     }
     #print(infomap["Hours: lecture-lab-tutorial"].text)
@@ -219,5 +221,7 @@ def get_departments(soup) ->str():
     return soup.find("div").text
 
 local_html = open("STAT261.html", "r")
+local_html = open("CSC205.html", "r")
+
 data = get_data(local_html)
 
