@@ -9,20 +9,24 @@ import codecs
 import os
 
 from selenium.webdriver.support.wait import WebDriverWait
-
-driver = webdriver.Edge()
+counter = 0
+##driver = webdriver.Edge()
 ##options = webdriver.EdgeOptions()
-wait = WebDriverWait(driver, timeout=30)
+##wait = WebDriverWait(driver, timeout=30)
 
 
 
-def save_html(d: bs4.BeautifulSoup ):
-    file_name = d.find(By.CLASS_NAME, "course-view__itemTitleAndTranslationButton___36N-_").split(" ")[0].join(".html")
+def save_html(raw_html):
 
+    ##file_name = raw_html.find(By.CLASS_NAME, "course-view__itemTitleAndTranslationButton___36N-_").text + (".html")
+    global counter
+
+
+    file_name = (str(counter))+(".html")
+    counter = counter+1
     new_file = os.path.join(".", file_name)
     file = codecs.open(new_file, "w", "utf-8")
-    h = d
-    file.write(h)
+    file.write(raw_html)
     file.close()
 
 
@@ -80,8 +84,9 @@ def render_html(url):
     driver.get(url)
     ##Wait until noBreak sections appear (sections with content we want)
     element_present = EC.presence_of_element_located((By.CLASS_NAME, 'noBreak'))
-    WebDriverWait(driver, timeout=10).until(element_present)
+    WebDriverWait(driver, timeout=10000).until(element_present)
     ##  wanted_component = driver.find_element(By.CLASS_NAME, 'noBreak')
+    print(driver.find_element(By.CLASS_NAME, "course-view__itemTitleAndTranslationButton___36N-_").text)
 
     ##Take rendered html_and pass it onto beautiful soup for ability to turn off recursive children search
     ##print(driver.page_source)
@@ -145,6 +150,7 @@ def save_all_class_htmls():
    ## links_file = open("links.txt")
 
     with open("links.txt") as links_file:
+
         for line in links_file:
             save_html(render_html(line))
 

@@ -1,3 +1,5 @@
+import os
+
 from bs4 import BeautifulSoup
 from enum import Enum, auto
 import unittest
@@ -50,6 +52,8 @@ def find_sub_reqs_recursive_revised(html, is_head):
     sibling_req = []
     child_req_array = []
     li_child = html.find("li", recursive=True)
+    print(html.text)
+    print(html.name)
     for thing in html.next_siblings:
         if thing.name == "li":
             sibling_li_list.append(thing)
@@ -61,9 +65,12 @@ def find_sub_reqs_recursive_revised(html, is_head):
 
     ##Can only find leaf node when going down
     ## case where we are at leaf node
-    if li_child is None:
+    if li_child is None and li_child not in visited_set:
         reqs = [Requirement(html)]
+        visited_set.add(html)
+
         for thing in html.next_siblings:
+            visited_set.add(thing)
             reqs.append(Requirement(thing))
 
         return reqs
@@ -81,13 +88,26 @@ def find_sub_reqs_recursive_revised(html, is_head):
 
     if is_head:
         req.set_sub_reqs(child_req_array)
-
         sibling_req.insert(0, req)
 
         return sibling_req
 
     req.set_sub_reqs(child_req_array)
     return req
+
+def find_sub_reqs(html, is_head):
+
+
+    ##Get the first list item in the html
+    li_child = html.find("li", recursive=True)
+
+
+    ##Case where we're at the leaf node in the HTML list tree
+    ''' if (li_child == None):
+        ##If there are siblings
+        child_siblings = li_child.find_next_siblings()
+        if child_siblings is not None
+    '''
 
 
 def traverse_reqs(req):
@@ -106,12 +126,13 @@ def traverse_reqs(req):
     return req
 
 
-def get_data(source_html) -> list:
+def get_data(source_html) -> dict:
     ##Start up beautiful soup and create a dictionary for holding different fields
     soup = BeautifulSoup(source_html, "lxml")
     source_html.close()
-
+    #print(source_html)
     infomap = {}
+
 
     ##Wait for desired elements to load then put them into a map
     info_array = soup.find_all("div", class_="noBreak")
@@ -123,20 +144,28 @@ def get_data(source_html) -> list:
         infomap[section_name] = thing
 
     coreqs = {}
-    total_pre_reqs = infomap["Prerequisites"].find("ul", recursive=True)
-
-    req = find_sub_reqs_wrapper(total_pre_reqs)
+    total_pre_reqs = {}
+    req = {}
+    hours = []
+    course_description = None
+    if "Prerequisites" in infomap.keys():
+        total_pre_reqs = infomap["Prerequisites"].find("ul", recursive=True)
+        req = find_sub_reqs_wrapper(total_pre_reqs).return_info()
     units = get_class_units(infomap["Units"])
     ##Get the class code and class name
     class_code_title_map = get_class_name(soup)
-    hours = get_class_hours(infomap["Hours: lecture-lab-tutorial"])
+
+    if "Hours: lecture-lab-tutorial" in infomap.keys():
+        hours = get_class_hours(infomap["Hours: lecture-lab-tutorial"])
     # Not every course has coreqs so initialize as none type
-    course_description = get_class_description(infomap["Description"])
+
+    if "Description" in infomap.keys():
+        course_description = get_class_description(infomap["Description"])
     department = get_departments(infomap["Course offered by"])
 
     if "Pre- or corequisites" in infomap.keys():
         ## If there are coreq section then look for coreqs
-        coreqs = find_sub_reqs_wrapper(infomap["Pre- or corequisites"].find("ul", recursive=True))
+        coreqs = find_sub_reqs_wrapper(infomap["Pre- or corequisites"].find("ul", recursive=True)).return_info()
         ##print("There is no coreqs")
     final_info_map = {
         "CourseCode": class_code_title_map["class code"],
@@ -147,18 +176,21 @@ def get_data(source_html) -> list:
         #"Notes": infomap["Note(s)"].text,
         "Department":department,
 
-        "Prereqs": req.return_info(),
+        "Prereqs": req,
         # Not every course has coreqs so initialize as empty map first
-        "Coreqs": coreqs.return_info()
+        "Coreqs": coreqs
 
     }
     #print(infomap["Hours: lecture-lab-tutorial"].text)
-    print(infomap["Description"].find("div").text)
+##    print(infomap["Description"].find("div").text)
+
+    return final_info_map
 
     ##print("num called:", num_called)
     with open("results.json", "w") as json_file:
         ##json.dump(req.return_info(), json_file, indent=2)
         json.dump(final_info_map, json_file, indent=2)
+        #json.dump(final_info_map, json_file, indent=2)
 
 
 
@@ -205,9 +237,9 @@ def get_class_hours(soup) -> dict:
     hours = soup.find(class_="course-view__pre___2VF54").text.split('-')
     # Text in hours has the following format: "lecture, lab, tutorial'
     hours_map = {
-        "Lecture": int(hours[0]),
-        "Lab":int( hours[1]),
-        "Tutorial": int(hours[2])
+        "Lecture": (hours[0]),
+        "Lab": (hours[1]),
+        "Tutorial": (hours[2])
     }
 
     return hours_map
@@ -215,13 +247,30 @@ def get_class_hours(soup) -> dict:
 
 # Gets the amount of credits in the main class being queried
 def get_class_units(soup) -> float:
+    if soup.find(class_="style__noFade___3YZlf").text.__contains__("or"):
+        return 1.5
 
     return float(soup.find(class_="style__noFade___3YZlf").text)
 def get_departments(soup) ->str():
     return soup.find("div").text
 
+
+def save_all_class_info():
+    
+    with open ("results.json") as results_file:
+        list_of_class_maps = []
+        os.chdir(r"./HTML")
+
+        for filename in os.listdir("."):
+            with open(filename, 'r') as html_file:
+                class_dict = get_data(html_file)
+                list_of_class_maps.append(class_dict)
+
+        json.dump(list_of_class_maps, results_file, indent=2)
+
 local_html = open("STAT261.html", "r")
 local_html = open("CSC205.html", "r")
-
+local_html = open("./HTML/1021.html", "r")
 data = get_data(local_html)
+#save_all_class_info()
 

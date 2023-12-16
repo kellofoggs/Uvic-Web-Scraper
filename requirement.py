@@ -5,6 +5,7 @@ class ReqType(Enum):
     COURSES = auto()
     UNITS = auto()
     REQUIREMENTS = auto()
+    OTHER = auto()
 
 
 def determine_type(req_html):
@@ -14,7 +15,11 @@ def determine_type(req_html):
     if req_html.text.__contains__("units of"):
         return ReqType.UNITS
 
-    return ReqType.COURSES
+    if req_html.text.__contains__("("):
+        return ReqType.COURSES
+
+    ##if req_html.text.__contains__("Permission"):
+    return ReqType.OTHER
 '''
 # Class for requirements. A requirement could be a singular class, a certain amount of 
 units or a collection of the other 2
@@ -37,6 +42,7 @@ class Requirement:
         self.name = doc.text
         self.html = doc
         self.sub_maps = []
+        #print(self)
 
         if self.type == ReqType.REQUIREMENTS:
             self.prep_for_reqs()
@@ -44,14 +50,19 @@ class Requirement:
             self.prep_for_courses()
 
         elif self.type == ReqType.UNITS:
-            self.prep_for_units
+            self.prep_for_units()
+        elif self.type == ReqType.OTHER:
+            self.prep_for_other()
 
     def set_sub_maps(self):
         if self.sub_reqs is not None and len(self.sub_reqs) > 0:
             for requirement in self.sub_reqs:
+                #print(requirement.html.text)
                 self.sub_maps.append(requirement.return_info())
         self.clean_up_quantity(self.html)
 
+    def prep_for_other(self):
+        return
     # Gets the name units and description of a course
     def prep_for_courses(self):
         hyphen_location = None
@@ -113,7 +124,7 @@ class Requirement:
         my_info = self.return_info()
 
         print(my_info)
-        print(self.html.text)
+        #print(self.html.text)
 
 
 
@@ -158,13 +169,8 @@ class Requirement:
                 self.quantity = float(search_array[location_of_quant])
 
 
-
+        '''
         if self.type == ReqType.COURSES:
             quantity = int(self.html.find(
                 "span").text)  ##get the span element then get its text then remove the last 5 characters and remove parantheses
-
-
-class ReqType(Enum):
-    REQUIREMENTS = auto()
-    COURSES = auto()
-    UNITS = auto()
+        '''
