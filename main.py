@@ -7,6 +7,8 @@ import requests
 import requirement
 from requirement import Requirement, ReqType
 import json
+import re
+
 
 # Test with CSC 205
 # Offline test for html scraping, does not require selenium
@@ -39,7 +41,11 @@ num_called = 0
 def find_sub_reqs_wrapper(html):
     global visited_set
     visited_set = set()  ##reset visited set
-    req = find_sub_reqs_recursive_revised(html, False)
+    #req = find_sub_reqs_recursive_revised(html, False)
+    if html.name != "li":
+        html = html.find("li")
+    req = find_sub_reqs(html, True)
+    #print(req)
     return req
 
 
@@ -48,12 +54,15 @@ def find_sub_reqs_wrapper(html):
 ##Modified dfs for prereq searching
 ##Returns a requirement object that holds nested maps of other requirements under neath it and so on
 def find_sub_reqs_recursive_revised(html, is_head):
+
+    child = html.find("li", recursive= True)
+
     sibling_li_list = []
     sibling_req = []
     child_req_array = []
     li_child = html.find("li", recursive=True)
-    print(html.text)
-    print(html.name)
+    #print(html.text)
+    #print(html.name)
     for thing in html.next_siblings:
         if thing.name == "li":
             sibling_li_list.append(thing)
@@ -95,19 +104,58 @@ def find_sub_reqs_recursive_revised(html, is_head):
     req.set_sub_reqs(child_req_array)
     return req
 
-def find_sub_reqs(html, is_head):
+
+def find_sub_reqs(html, is_head, parent_req=None) -> Requirement:
+
+    print(html.name)
+    print(html.text)
+
+    requirement = Requirement(html)
+
+    global visited_set
+
+    # Visit current node
+    visited_set.add(html)
+
+    # Visit siblings if any
+    if is_head:
+        sideways_traversal(html, parent_req)
 
 
-    ##Get the first list item in the html
+    # Get the first list item in the html
     li_child = html.find("li", recursive=True)
 
 
+
+    #When we're not at the head node
+
     ##Case where we're at the leaf node in the HTML list tree
-    ''' if (li_child == None):
-        ##If there are siblings
-        child_siblings = li_child.find_next_siblings()
-        if child_siblings is not None
-    '''
+    if (li_child is None):
+        #If there are siblings run algorithm on siblings sibling no
+        if parent_req is not None:
+            parent_req.add_to_sub_reqs(requirement)
+        return
+
+    else :
+        #Go down until we find the last level, every time we go down the node we visit is the head
+        if parent_req is not None:
+            parent_req.add_to_sub_reqs(requirement)
+        find_sub_reqs(li_child, True, parent_req= requirement)
+        return
+
+    return requirement
+
+
+def sideways_traversal(html, parent_req = None):
+    siblings = html.find_next_siblings()
+
+    if siblings is not None and len(siblings) > 0:
+        #print("Same level")
+        for element in siblings:
+            new_element = element
+            if new_element.name != "li":
+                new_element = new_element.find("li")
+            find_sub_reqs(new_element, False, parent_req)
 
 
 def traverse_reqs(req):
@@ -130,6 +178,8 @@ def get_data(source_html) -> dict:
     ##Start up beautiful soup and create a dictionary for holding different fields
     soup = BeautifulSoup(source_html, "lxml")
     source_html.close()
+
+
     #print(source_html)
     infomap = {}
 
@@ -139,7 +189,7 @@ def get_data(source_html) -> dict:
     for thing in info_array:
         section_name = thing.find(class_="course-view__label___FPV12").text
 
-        print(section_name)
+       # print(section_name)
 
         infomap[section_name] = thing
 
@@ -148,12 +198,19 @@ def get_data(source_html) -> dict:
     req = {}
     hours = []
     course_description = None
+    department = None
+
+
     if "Prerequisites" in infomap.keys():
         total_pre_reqs = infomap["Prerequisites"].find("ul", recursive=True)
-        req = find_sub_reqs_wrapper(total_pre_reqs).return_info()
-    units = get_class_units(infomap["Units"])
+        req = (find_sub_reqs_wrapper(total_pre_reqs))
+               #.return_info())
+
+    if "Units" in infomap.keys():
+        units = get_class_units(infomap["Units"])
     ##Get the class code and class name
     class_code_title_map = get_class_name(soup)
+
 
     if "Hours: lecture-lab-tutorial" in infomap.keys():
         hours = get_class_hours(infomap["Hours: lecture-lab-tutorial"])
@@ -161,12 +218,17 @@ def get_data(source_html) -> dict:
 
     if "Description" in infomap.keys():
         course_description = get_class_description(infomap["Description"])
-    department = get_departments(infomap["Course offered by"])
+
+
+    if "Course offered by" in infomap.keys():
+        department = get_departments(infomap["Course offered by"])
 
     if "Pre- or corequisites" in infomap.keys():
         ## If there are coreq section then look for coreqs
-        coreqs = find_sub_reqs_wrapper(infomap["Pre- or corequisites"].find("ul", recursive=True)).return_info()
+        coreqs = find_sub_reqs_wrapper(infomap["Pre- or corequisites"].find("ul", recursive=True))
+        #.return_info()
         ##print("There is no coreqs")
+
     final_info_map = {
         "CourseCode": class_code_title_map["class code"],
         "CourseName": class_code_title_map["class name"],
@@ -185,6 +247,7 @@ def get_data(source_html) -> dict:
 ##    print(infomap["Description"].find("div").text)
 
     return final_info_map
+
 
     ##print("num called:", num_called)
     with open("results.json", "w") as json_file:
@@ -246,31 +309,56 @@ def get_class_hours(soup) -> dict:
 
 
 # Gets the amount of credits in the main class being queried
-def get_class_units(soup) -> float:
+def get_class_units(soup):
     if soup.find(class_="style__noFade___3YZlf").text.__contains__("or"):
         return 1.5
 
-    return float(soup.find(class_="style__noFade___3YZlf").text)
+    return (soup.find(class_="style__noFade___3YZlf").text)
 def get_departments(soup) ->str():
     return soup.find("div").text
 
 
 def save_all_class_info():
     
-    with open ("results.json") as results_file:
+    with open ("results.json", "w") as results_file:
         list_of_class_maps = []
         os.chdir(r"./HTML")
 
         for filename in os.listdir("."):
-            with open(filename, 'r') as html_file:
+            with open(filename, 'r',encoding="utf8") as html_file:
+                #print(filename)
                 class_dict = get_data(html_file)
                 list_of_class_maps.append(class_dict)
 
         json.dump(list_of_class_maps, results_file, indent=2)
 
+'''
+print(ord('A'))
+print(ord('Z'))
+print(ord('0'))
+print(ord('9'))
+print(ord('-'))
 local_html = open("STAT261.html", "r")
 local_html = open("CSC205.html", "r")
-local_html = open("./HTML/1021.html", "r")
+local_html = open("./HTML/1023.html", "r")
+local_html = open("./HTML/1233.html", 'r')
+#local_html = open("./HTML/1728.html", encoding="utf8")
+'''
+local_html = open("./HTML/727.html")
+local_html = open("./HTML/703.html")
+
 data = get_data(local_html)
+
 #save_all_class_info()
+# class_code_regex = "^[A-Za-z\\-]+.*\\s{0,2}-\\s{0,2}[0-9]+$"
+
+class_code_regex = "^[A-Za-z\\-0-9]+"
+has_numerals_regex = "\d"
+
+code = "EDCI307A - Art in the Elementary or Middle Classroom I (1.5)"
+x = re.findall(class_code_regex, code)
+print(x)
+
+
+
 

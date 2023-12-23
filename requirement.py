@@ -1,4 +1,11 @@
 from enum import Enum, auto
+import re
+
+#Regex for strings that start with letters and end with some number with a hyphen in the middle
+class_code_regex =  "^[A-Za-z\\-0-9]+\S"
+has_numerals_regex = "\d"
+has_letters_regex = "[A-Za-z].+"
+
 
 
 class ReqType(Enum):
@@ -15,11 +22,18 @@ def determine_type(req_html):
     if req_html.text.__contains__("units of"):
         return ReqType.UNITS
 
-    if req_html.text.__contains__("("):
+    '''
+     if req_html.text.__contains__("("):)
         return ReqType.COURSES
 
-    ##if req_html.text.__contains__("Permission"):
+    '''
+    if re.search(class_code_regex, req_html.text) is not None:
+        if re.search(has_numerals_regex, req_html.text) is not None:
+            return ReqType.COURSES
+
     return ReqType.OTHER
+
+
 '''
 # Class for requirements. A requirement could be a singular class, a certain amount of 
 units or a collection of the other 2
@@ -28,7 +42,7 @@ units or a collection of the other 2
 
 class Requirement:
     type = None
-    course_title = None
+    course_code = None
     course_description = None
     name = None
     sub_reqs = None
@@ -36,18 +50,20 @@ class Requirement:
     html = None
     sub_maps = None
 
+    alphanumeric_window = []
     # Constructor for requirement call
     def __init__(self, doc):
         self.type = determine_type(doc)
         self.name = doc.text
         self.html = doc
+        self.sub_reqs = []
         self.sub_maps = []
-        #print(self)
+        # print(self)
 
         if self.type == ReqType.REQUIREMENTS:
             self.prep_for_reqs()
         elif self.type == ReqType.COURSES:
-            self.prep_for_courses()
+            self.prep_for_courses_revised()
 
         elif self.type == ReqType.UNITS:
             self.prep_for_units()
@@ -57,13 +73,19 @@ class Requirement:
     def set_sub_maps(self):
         if self.sub_reqs is not None and len(self.sub_reqs) > 0:
             for requirement in self.sub_reqs:
-                #print(requirement.html.text)
+                # print(requirement.html.text)
                 self.sub_maps.append(requirement.return_info())
         self.clean_up_quantity(self.html)
 
     def prep_for_other(self):
         return
+
     # Gets the name units and description of a course
+
+
+
+
+    '''
     def prep_for_courses(self):
         hyphen_location = None
         found_title = False
@@ -90,7 +112,7 @@ class Requirement:
                     course_long.pop(len(course_long) - 1)
                     course_long.pop(len(course_long) - 1)
 
-                    self.course_title = "".join(course_long)
+                    self.course_code = "".join(course_long)
 
                     found_title = True
                 # If we found the '(' before the number then we can go further into the string to look for the credit amount
@@ -102,9 +124,45 @@ class Requirement:
                     string_number_array.append(char)
                 elif ord(char) == 41:
                     to_be_converted_to_int = "".join(string_number_array)
-                    self.quantity = float(to_be_converted_to_int)
+                    self.quantity = (to_be_converted_to_int)
                     return
 
+    '''
+    def prep_for_courses(self):
+        req_text = self.html.text
+
+
+    #Use the HTML element to p
+    def fetch_course_code(self, html_element):
+        req_text = html_element
+        course_code_found = False
+        output_array = []
+        for i in range(0, len(req_text)):
+            char = req_text[i]
+            if char == ' ':
+                output_string = "".join(output_array)
+                return output_string
+            else:
+                output_array.append(char)
+
+        '''self.course_code = re.search(class_code_regex, req_text).group()
+        
+        self.course_code = re.search(has_numerals_regex, self.course_code).group()
+        print("Course code: ", self.course_code)
+        '''
+
+    def fetch_course_title(self):
+        return
+
+    def fetch_course_units(self):
+        return
+
+    def prep_for_courses_revised(self):
+        self.fetch_course_code(self.html.text)
+
+        self.fetch_course_title()
+
+        self.fetch_course_units()
 
     def prep_for_reqs(self):
         self.name = "Complete"
@@ -124,9 +182,7 @@ class Requirement:
         my_info = self.return_info()
 
         print(my_info)
-        #print(self.html.text)
-
-
+        # print(self.html.text)
 
     def return_info(self):
         my_info = {
@@ -147,6 +203,7 @@ class Requirement:
 
     def add_to_sub_reqs(self, element):
         self.sub_reqs.append(element)
+        self.sub_maps.append(element.return_info())
 
     def set_sub_reqs(self, in_array):
         self.sub_reqs = in_array
@@ -159,7 +216,7 @@ class Requirement:
             location_of_quant = 0
             for i in range(0, len(search_array)):
                 if search_array[i].__contains__("of"):
-                    location_of_quant = i-1
+                    location_of_quant = i - 1
                     break
 
             if search_array[location_of_quant] == "all":
@@ -167,7 +224,6 @@ class Requirement:
 
             else:
                 self.quantity = float(search_array[location_of_quant])
-
 
         '''
         if self.type == ReqType.COURSES:
