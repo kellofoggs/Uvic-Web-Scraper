@@ -1,10 +1,12 @@
 from enum import Enum, auto
 import re
+import utilities
 
-#Regex for strings that start with letters and end with some number with a hyphen in the middle
-class_code_regex =  "^[A-Za-z\\-0-9]+\S"
-has_numerals_regex = "\d"
+# Regex for strings that start with letters and end with some number with a hyphen in the middle
+class_code_regex = "^[A-Za-z\\-0-9]+\\S"
+has_numerals_regex = "\\d"
 has_letters_regex = "[A-Za-z].+"
+
 
 
 
@@ -13,6 +15,10 @@ class ReqType(Enum):
     UNITS = auto()
     REQUIREMENTS = auto()
     OTHER = auto()
+
+
+
+
 
 
 def determine_type(req_html):
@@ -33,6 +39,17 @@ def determine_type(req_html):
 
     return ReqType.OTHER
 
+
+def reqtype_to_string(input_type):
+    output = None
+    if input_type == ReqType.COURSES:
+        return "Course"
+    if input_type == ReqType.REQUIREMENTS:
+        return "Requirement"
+    if input_type == ReqType.OTHER:
+        return "Other"
+    if input_type == ReqType.UNITS:
+        return "Units"
 
 '''
 # Class for requirements. A requirement could be a singular class, a certain amount of 
@@ -133,17 +150,7 @@ class Requirement:
 
 
     #Use the HTML element to p
-    def fetch_course_code(self, html_element):
-        req_text = html_element
-        course_code_found = False
-        output_array = []
-        for i in range(0, len(req_text)):
-            char = req_text[i]
-            if char == ' ':
-                output_string = "".join(output_array)
-                return output_string
-            else:
-                output_array.append(char)
+
 
         '''self.course_code = re.search(class_code_regex, req_text).group()
         
@@ -158,7 +165,7 @@ class Requirement:
         return
 
     def prep_for_courses_revised(self):
-        self.fetch_course_code(self.html.text)
+        self.name = utilities.fetch_course_code(self.html.text)
 
         self.fetch_course_title()
 
@@ -186,7 +193,7 @@ class Requirement:
 
     def return_info(self):
         my_info = {
-            ##'type': self.type,
+            "type": reqtype_to_string(self.type),
             "name": self.name,
             ##"course_title": self.course_title,
             "quantity": self.quantity,
