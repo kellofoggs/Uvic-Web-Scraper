@@ -6,6 +6,7 @@ import utilities
 class_code_regex = "^[A-Za-z\\-0-9]+\\S"
 has_numerals_regex = "\\d"
 has_letters_regex = "[A-Za-z].+"
+is_number_of_units_regex = "\\(\\d\\)"
 
 
 
@@ -22,17 +23,14 @@ class ReqType(Enum):
 
 
 def determine_type(req_html):
+    # print(req_html.text)
     if req_html.text.__contains__("Complete") or req_html.text.__contains__("complete"):
         return ReqType.REQUIREMENTS
 
     if req_html.text.__contains__("units of"):
         return ReqType.UNITS
 
-    '''
-     if req_html.text.__contains__("("):)
-        return ReqType.COURSES
 
-    '''
     if re.search(class_code_regex, req_html.text) is not None:
         if re.search(has_numerals_regex, req_html.text) is not None:
             return ReqType.COURSES
@@ -58,7 +56,11 @@ units or a collection of the other 2
 
 
 class Requirement:
+    #Class variables
+
+    #What type of requirement the requirement is, types listed in ReqType Enum
     type = None
+
     course_code = None
     course_description = None
     name = None
@@ -66,8 +68,10 @@ class Requirement:
     quantity = 0
     html = None
     sub_maps = None
+    is_complete_all = False
 
     alphanumeric_window = []
+
     # Constructor for requirement call
     def __init__(self, doc):
         self.type = determine_type(doc)
@@ -80,107 +84,96 @@ class Requirement:
         if self.type == ReqType.REQUIREMENTS:
             self.prep_for_reqs()
         elif self.type == ReqType.COURSES:
-            self.prep_for_courses_revised()
+            self.prep_for_courses()
 
         elif self.type == ReqType.UNITS:
             self.prep_for_units()
         elif self.type == ReqType.OTHER:
             self.prep_for_other()
 
+    '''
+    Family of functions cleans up quantity of their respective types
+    '''
+
+    # Sets the quantity for a course type requirement, a courses "quantity" is the amount of credits it is worth
+    def clean_up_course_quantity(self, soup):
+        output = 0
+        is_number_of_units_regex = "\\([0-9\\.]+\\)$"
+        source_text = soup.text
+        x = re.findall(is_number_of_units_regex, source_text)
+        for string in x:
+            new_string = string[1:len(string) - 1]
+            output = new_string
+        # print(output)
+        return output
+
+    # Sets the quantity for a requirement type requirement
+    def clean_up_reqs(self):
+        target_string = self.html.text
+        suspected_quantity = 0
+
+        # Use KMP search algorithm to find where "Complete" is
+        #location_of_complete = utilities.KMPSearch("Complete", target_string)
+
+        #Split target string by spaces
+        target_array = target_string.split(" ")
+
+        return target_array[1]
+
+        # If we have all as our quantity then set bool to true
+
+
+        # This allows for quantity to be incremented when sub-req is added
+        self.is_complete_all = True
+
+        #Else
+        self.quantity = suspected_quantity
+
+        return
+
+
+    def clean_up_other(self, soup):
+        return
+
+    def clean_up_units(self, soup):
+        self.quantity = self.html.text
+        return
+
+
+
+
+    #Sets the sub maps to the proper value --obsolete
     def set_sub_maps(self):
         if self.sub_reqs is not None and len(self.sub_reqs) > 0:
             for requirement in self.sub_reqs:
                 # print(requirement.html.text)
                 self.sub_maps.append(requirement.return_info())
-        self.clean_up_quantity(self.html)
+        #self.clean_up_quantity(self.html)
 
     def prep_for_other(self):
         return
 
-    # Gets the name units and description of a course
-
-
-
-
-    '''
     def prep_for_courses(self):
-        hyphen_location = None
-        found_title = False
-
-        course_long = []
-        string_number_array = []
-        link = self.html.find("a")
-        if link is not None:
-            self.name = link.text
-
-        for i in range(0, len(self.html.text)):
-            char = self.html.text[i]
-            ##When we find char we can start looking at text after it
-            if char == '-':
-                hyphen_location = i
-                break
-
-        for j in range(hyphen_location + 2, len(self.html.text)):
-            char = self.html.text[j]
-            course_long.append(char)
-
-            if not found_title:
-                if char == '(':
-                    course_long.pop(len(course_long) - 1)
-                    course_long.pop(len(course_long) - 1)
-
-                    self.course_code = "".join(course_long)
-
-                    found_title = True
-                # If we found the '(' before the number then we can go further into the string to look for the credit amount
-                continue
-
-            ##Find the credits that the course has
-            if found_title:
-                if ord(char) in range(48, 57) or ord(char) == 46:
-                    string_number_array.append(char)
-                elif ord(char) == 41:
-                    to_be_converted_to_int = "".join(string_number_array)
-                    self.quantity = (to_be_converted_to_int)
-                    return
-
-    '''
-    def prep_for_courses(self):
-        req_text = self.html.text
-
-
-    #Use the HTML element to p
-
-
-        '''self.course_code = re.search(class_code_regex, req_text).group()
-        
-        self.course_code = re.search(has_numerals_regex, self.course_code).group()
-        print("Course code: ", self.course_code)
-        '''
-
-    def fetch_course_title(self):
-        return
-
-    def fetch_course_units(self):
-        return
-
-    def prep_for_courses_revised(self):
         self.name = utilities.fetch_course_code(self.html.text)
 
-        self.fetch_course_title()
+        self.quantity = self.clean_up_course_quantity(self.html)
+        #self.fetch_course_title()
 
-        self.fetch_course_units()
+        #self.fetch_course_units()
 
     def prep_for_reqs(self):
         self.name = "Complete"
 
-        # find the quantity from the complete "of" line
 
-        ##self.quantity = 0
+        # find the quantity from the complete "of" line
+        self.quantity = self.clean_up_reqs()
+        # self.quantity = self.html.text
         return
 
     def prep_for_units(self):
-        return 0
+        self.clean_up_units(self.html)
+
+    #Does most of the work for prep for reqs,
 
     def get_html(self):
         return self.html
@@ -190,6 +183,8 @@ class Requirement:
 
         print(my_info)
         # print(self.html.text)
+
+
 
     def return_info(self):
         my_info = {
@@ -201,39 +196,19 @@ class Requirement:
             ##"sub reqs": self.sub_reqs,
             ##'sub req names': [x in self.sub_reqs.name]
             "sub maps": self.sub_maps
-
         }
-
         return my_info
 
-    ## def sub_reqs_to_map(self):
 
     def add_to_sub_reqs(self, element):
         self.sub_reqs.append(element)
         self.sub_maps.append(element.return_info())
 
+        #self.quantity = element.quantity + self.quantity
+
     def set_sub_reqs(self, in_array):
         self.sub_reqs = in_array
         self.set_sub_maps()
 
-    def clean_up_quantity(self, soup):
-        if self.type == ReqType.REQUIREMENTS:
-            self.sub_reqs = []
-            search_array = soup.text.split(' ')
-            location_of_quant = 0
-            for i in range(0, len(search_array)):
-                if search_array[i].__contains__("of"):
-                    location_of_quant = i - 1
-                    break
 
-            if search_array[location_of_quant] == "all":
-                self.quantity = float(len(self.sub_maps))
 
-            else:
-                self.quantity = float(search_array[location_of_quant])
-
-        '''
-        if self.type == ReqType.COURSES:
-            quantity = int(self.html.find(
-                "span").text)  ##get the span element then get its text then remove the last 5 characters and remove parantheses
-        '''

@@ -1,0 +1,308 @@
+#content.full-width{
+	 width:98% 
+}
+ table.enrollment-stats tfoot tr th:nth-child(2),table.enrollment-stats tfoot tr th:nth-child(3),table.enrollment-stats tfoot tr th:nth-child(4),table.enrollment-stats thead tr th:nth-child(2),table.enrollment-stats thead tr th:nth-child(3),table.enrollment-stats thead tr th:nth-child(4),table.enrollment-stats tr td:nth-child(2),table.enrollment-stats tr td:nth-child(3),table.enrollment-stats tr td:nth-child(4){
+	 text-align:right 
+}
+ #content #kuali-catalog .notices{
+	 overflow:hidden;
+	 background-color:khaki;
+	 padding:8px;
+	 padding:.8rem;
+	 clear:both;
+	 margin-bottom:16px;
+	 margin-bottom:1.6rem 
+}
+ .lwcw .feed-blog h3{
+	 padding:.33333em .66666em;
+	 margin-bottom:0;
+	 color:#fff;
+	 background-color:#005493 
+}
+ #content #kuali-catalog a.btn_mid{
+	 border-radius:16px;
+	 border-radius:1.6rem;
+	 background-color:#005493;
+	 color:#fff!important;
+	 text-decoration:none;
+	 display:block;
+	 padding:8px;
+	 padding:.8rem;
+	 text-align:center 
+}
+/* Updated 2020/12/17 by Amos */
+ #content #kuali-catalog .style__richTextWrapper___3FIVs h3, #content #kuali-catalog .AgOb_1lc h3, #content #kuali-catalog .style__policyContainer___-oCqB h3{
+	 border-bottom:1px solid #cacaca 
+}
+ #kuali-catalog #specializationsWrapper{
+	 padding-bottom:20px;
+	 padding-bottom:2rem 
+}
+ #content #kuali-catalog a.btn_mid:focus,#content #kuali-catalog a.btn_mid:hover{
+	 background-color:#002754;
+	 color:#fff!important 
+}
+ #content #kuali-catalog ._32wl3V9U{
+	 overflow:hidden 
+}
+ #content #kuali-catalog .__KUALI_THEMABLE__ .style__contentBody___38EQd p{
+	 margin-bottom: 16px;
+}
+ #content #kuali-catalog .__KUALI_THEMABLE__ table._2Fvl8L1U{
+	 padding:0 
+}
+ #content #kuali-catalog .__KUALI_THEMABLE__ i{
+	 font-style:italic 
+}
+ #content #kuali-catalog .__KUALI_THEMABLE__ button i.md-icon{
+	 font-style:normal 
+}
+ #content #kuali-catalog .__KUALI_THEMABLE__ b{
+	 font-weight:700 
+}
+ #content #kuali-catalog .__KUALI_THEMABLE__ .kevH0Nj1 .md-toolbar .md-toolbar--action-left{
+	 padding-left:2.6rem 
+}
+ #content #kuali-catalog .__KUALI_THEMABLE__ ._93GXH6fZ{
+	 padding-left:2.6rem 
+}
+ #content #kuali-catalog .__KUALI_THEMABLE__ ._2ctkLCHv{
+	 width:200px 
+}
+ #content #kuali-catalog ._2ctkLCHv ul{
+	 line-height:1.6rem 
+}
+ #content #kuali-catalog ._2ctkLCHv ul li{
+	 height:32px!important 
+}
+ #content #kuali-catalog ._2ctkLCHv ul li .md-fake-btn{
+	 height:32px!important 
+}
+ #content #kuali-catalog .__KUALI_THEMABLE__ div[role=banner]>div{
+	 display:none 
+}
+ #content #kuali-catalog .__KUALI_THEMABLE__ #Search{
+	 font-size:24px 
+}
+ #content #kuali-catalog nav {
+	 width: 200px;
+}
+ #content #kuali-catalog nav ul[class^='style__navList_'] {
+	 padding-right: 0;
+	 padding-left: 0;
+}
+ #content #kuali-catalog .__KUALI_THEMABLE__ ._3qph0pg6 div div:nth-child(2) div, #content #kuali-catalog nav ul li {
+	 font-size:12px!important 
+}
+ #content #kuali-catalog nav ul li {
+	 padding: 7px 16px;
+}
+ #content #kuali-catalog nav ul li {
+	 border-radius: 0;
+}
+ #content #kuali-catalog nav .md-list .md-list-item, #content #kuali-catalog nav ul li {
+	 background-color:#005493!important 
+}
+ #content #kuali-catalog nav .md-text, #content #kuali-catalog nav ul li {
+	 color:#fff 
+}
+ #content #kuali-catalog nav .md-list .md-fake-btn, #content #kuali-catalog nav ul li {
+	 border-bottom:1px solid #3376a9 
+}
+ #content #kuali-catalog nav .md-list .md-pointer--hover:hover, #content #kuali-catalog nav ul li:hover{
+	 background-color:#002754!important;
+	 text-decoration: none 
+}
+ #content #kuali-catalog .md-list .md-list-item[style]:not([style=""]), #content #kuali-catalog nav ul li.selectedNavItem, #content #kuali-catalog nav ul li.selectedNestedItem {
+	 background-color:#f5aa1c!important 
+}
+ #content #kuali-catalog .md-list .md-list-item[style]:not([style=""]) .md-pointer--hover:hover, #content #kuali-catalog nav ul li.selectedNavItem:hover, #content #kuali-catalog nav ul li.selectedNestedItem:hover {
+	 background-color:#f5aa1c!important 
+}
+ #content #kuali-catalog .md-list .md-list-item[style]:not([style=""]) .md-text, #content #kuali-catalog nav ul li.selectedNavItem, #content #kuali-catalog nav ul li.selectedNestedItem {
+	 color:#000 
+}
+ #content #kuali-catalog nav ul li.selectedNavItem a, #content #kuali-catalog nav ul li.selectedNavItem a:hover {
+	 color: #000 !important;
+	 text-decoration: none;
+}
+ #content #kuali-catalog nav ul li a, #content #kuali-catalog nav ul li a:hover {
+	 color: #fff !important;
+	 text-decoration: none;
+}
+ #kuali-catalog nav .md-list.md-list--drawer > div {
+	 margin-left: 0;
+	 margin-right: 0;
+}
+ #content #kuali-catalog ._2lgD3s4V{
+	 display:block 
+}
+ #content #kuali-catalog ._1uVA-6El .md-select-field__toggle .md-floating-label{
+	 padding-left:15px 
+}
+ #content #kuali-catalog .__KUALI_THEMABLE__ ._2lgD3s4V{
+	 margin-bottom:80px 
+}
+ #content #kuali-catalog .__KUALI_THEMABLE__ ._3pDtgqJG .kuali-print-hide{
+	 margin-right:25px 
+}
+ #content #kuali-catalog .__KUALI_THEMABLE__ table thead tr{
+	 background-color:#3376a9;
+	 color:#fff 
+}
+ #content #kuali-catalog .__KUALI_THEMABLE__ nav.md-drawer--fixed{
+	 z-index:60 
+}
+ #content #kuali-catalog .__KUALI_THEMABLE__ ._3Ju7yskW ul{
+	 list-style-type:square 
+}
+ #kuali-catalog .__KUALI_THEMABLE__ .rules-wrapper ul li{
+	 list-style-type:disc 
+}
+ #kuali-catalog .__KUALI_THEMABLE__ .rules-wrapper ul li ul li{
+	 list-style-type:circle 
+}
+ #kuali-catalog .__KUALI_THEMABLE__ .rules-wrapper ul li ul li ul li{
+	 list-style-type:square 
+}
+ #content #kuali-catalog .__KUALI_THEMABLE__ ._3Ju7yskW section header div{
+	 padding-left:0 
+}
+ #content #kuali-catalog .__KUALI_THEMABLE__ ._3Ju7yskW section header ._2NC7bnpg{
+	 padding:10px 5px 10px 5px;
+	 height: auto;
+	 overflow:hidden;
+}
+ #content #kuali-catalog .__KUALI_THEMABLE__ .rules-wrapper section{
+	 border:1px solid #ccc;
+	 margin-bottom:1.5em 
+}
+ #content #kuali-catalog .__KUALI_THEMABLE__ .rules-wrapper section header+div,#content #kuali-catalog .__KUALI_THEMABLE__ .rules-wrapper section section header+div{
+	 padding:.5em 
+}
+ #content #kuali-catalog .__KUALI_THEMABLE__ .rules-wrapper section header div+div{
+	 padding-left:5px;
+	 padding-right:5px 
+}
+ #content #kuali-catalog .__KUALI_THEMABLE__ .rules-wrapper section section{
+	 border:1px solid #ccc;
+	 margin:1em 
+}
+ #content #kuali-catalog .__KUALI_THEMABLE__ table{
+	 table-layout:auto;
+	 border-collapse:collapse 
+}
+ #content #kuali-catalog .__KUALI_THEMABLE__ table tbody tr{
+	 border-top:1px solid #d6d6d6 
+}
+ #content #kuali-catalog .__KUALI_THEMABLE__ table thead+tbody tr:nth-child(even){
+	 background-color:#d6d6d6 
+}
+ .show-alert{
+	 display:block 
+}
+ #content #kuali-catalog .__KUALI_THEMABLE__ ._3tXX90LU{
+	 padding-right:5px 
+}
+/* Updated 2020/12/17 by Amos #content #kuali-catalog .__KUALI_THEMABLE__ main#kuali-catalog-main div.noBreak .program-view__label___3Ui-H,#content #kuali-catalog .__KUALI_THEMABLE__ main#kuali-catalog-main div.noBreak .experience-view__label___WnB17{
+	 display: none;
+}
+ */
+ #content #kuali-catalog .__KUALI_THEMABLE__ main div.noBreak .program-view__label___3Ui-H, #content #kuali-catalog .__KUALI_THEMABLE__ main div.noBreak .experience-view__label___WnB17 {
+	 display: none;
+}
+ #content #kuali-catalog ._3xLl2N13 > div > div:first-child{
+	 font-size:x-large 
+}
+ #content #kuali-catalog #specializationsWrapper ._3xLl2N13 {
+	 border: 1px solid #ccc;
+	 margin-bottom: 1.5em 
+}
+ #content #kuali-catalog #specializationsWrapper ._2QKOWbAy{
+	 margin-top:0;
+}
+ #content #kuali-catalog ul ul {
+	 padding-left:1.5em;
+}
+ #content #kuali-catalog ._3Fk5lykj{
+	 height:auto!important;
+	 ;
+}
+ .side-nav {
+	 margin-top:15px;
+}
+ .subjects-list-box {
+	 height: 200px;
+	 width: 200px;
+	 overflow: auto;
+	 border: 1px solid #ddd;
+	 padding: 2px 4px;
+	 margin-bottom: 15px;
+}
+ .subjects-list-box ul li {
+	 list-style: none;
+	 margin-left: 0;
+	 padding: 2px 0;
+}
+ #content #kuali-catalog .__KUALI_THEMABLE__ .Du-y18hU p{
+	 margin-bottom:16px;
+}
+
+#content #kuali-catalog .program-view__label___3Ui-H {
+    display:none;
+}
+
+ @media screen and (min-width:320px){
+	 #content #kuali-catalog .__KUALI_THEMABLE__ .md-list{
+		 padding-bottom:0;
+		 padding-top:0 
+	}
+	 #content #kuali-catalog .__KUALI_THEMABLE__ .Du-y18hU img{
+		 top:0;
+		 bottom:0;
+		 left:0;
+		 right:0;
+		 margin:auto;
+		 float:none!important;
+		 display:block 
+	}
+	 #content #kuali-catalog ._1uVA-6El .md-menu--select-field,#content #kuali-catalog .__KUALI_THEMABLE__ .fX4G1lrS{
+		 padding-left:2.5rem 
+	}
+	 #content #kuali-catalog ._1uVA-6El .md-select-field__toggle span.md-icon-text{
+		 padding-left:1.5rem 
+	}
+}
+ @media print,screen and (min-width:768px){
+	 #content #kuali-catalog .__KUALI_THEMABLE__ ._93GXH6fZ{
+		 padding-left:0 
+	}
+	 #content #kuali-catalog .__KUALI_THEMABLE__ .Du-y18hU img{
+		 float:right!important 
+	}
+	 #content #kuali-catalog ._1uVA-6El .md-menu--select-field{
+		 padding-left:0 
+	}
+	 #content #kuali-catalog .__KUALI_THEMABLE__ .fX4G1lrS{
+		 padding-left:8px 
+	}
+}
+ @media print,screen and (min-width:990px){
+	 #content #kuali-catalog{
+		 position:relative;
+		 top:-30px 
+	}
+	 #left{
+		 background:0 0 
+	}
+}
+ @media print{
+	 #content #kuali-catalog .class-schedules, #content #kuali-catalog #course-schedules-links, .btns, #content #kuali-catalog ._1RH4M9QK {
+		 display:none;
+	}
+	 #content #kuali-catalog ._1BAl_h8W{
+		 margin-top:3rem;
+		 margin-top:30px 
+	}
+}
+ 
