@@ -4,12 +4,10 @@ import utilities
 
 # Regex for strings that start with letters and end with some number with a hyphen in the middle
 class_code_regex = "^[A-Za-z\\-0-9]+\\S"
+class_code_regex = "^([A-Z]+)\\S*[0-9]+.*"
 has_numerals_regex = "\\d"
 has_letters_regex = "[A-Za-z].+"
 is_number_of_units_regex = "\\(\\d\\)"
-
-
-
 
 class ReqType(Enum):
     COURSES = auto()
@@ -65,7 +63,7 @@ class Requirement:
     course_description = None
     name = None
     sub_reqs = None
-    quantity = 0
+    quantity = ""
     html = None
     sub_maps = None
     is_complete_all = False
@@ -105,12 +103,12 @@ class Requirement:
             new_string = string[1:len(string) - 1]
             output = new_string
         # print(output)
-        return output
+        return str(output)
 
     # Sets the quantity for a requirement type requirement
     def clean_up_reqs(self):
         target_string = self.html.text
-        suspected_quantity = 0
+        suspected_quantity = "0"
 
         # Use KMP search algorithm to find where "Complete" is
         #location_of_complete = utilities.KMPSearch("Complete", target_string)

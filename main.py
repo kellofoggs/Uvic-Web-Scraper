@@ -76,9 +76,10 @@ def find_sub_reqs_wrapper(html):
 
 # For new find sub reqs go all the way down first then start making objects
 def find_sub_reqs(html, is_head,parent_req = None):
-    requirement = Requirement(html)
+    # Generate a 'Requirement' object from the current HTML element that is a list item
+    current_req = Requirement(html)
 
-
+    # Bring in the visited set from global scope
     global visited_set
 
     # Visit current node
@@ -93,24 +94,30 @@ def find_sub_reqs(html, is_head,parent_req = None):
 
     # When we're not at the head node
     if parent_req is not None:
-        # Case where we're at the leaf node in the HTML list tree
+
+        # Case where we're at the leaf node in the HTML list tree (this generally results in a "course" req or "other" type of req
         if li_child is None:
+
             # If there are siblings run algorithm on siblings sibling no
-            parent_req.add_to_sub_reqs(requirement)
+            parent_req.add_to_sub_reqs(current_req)
             return
 
         else:
 
             # Go down until we find the last level, every time we go down the node we visit is the head
-            parent_req.add_to_sub_reqs(requirement)
+            parent_req.add_to_sub_reqs(current_req)
             if html.siblings is None or len(html.siblings) <= 0:
-                parent_req.add_to_sub_reqs(requirement)
-            find_sub_reqs(li_child, True, parent_req=requirement)
+
+                parent_req.add_to_sub_reqs(current_req)
+            find_sub_reqs(li_child, True, parent_req=current_req)
             return
     else:
         if li_child is not None:
-            find_sub_reqs(li_child, True, parent_req=requirement)
-    return requirement
+            find_sub_reqs(li_child, True, parent_req=current_req)
+    return current_req
+
+
+# Looks at sibling requirements in the same 'level' as current requirements
 
 def sideways_traversal(html, parent_req=None):
     siblings = html.find_next_siblings()
@@ -170,12 +177,12 @@ def get_data(source_html) -> dict:
         # If there are coreq section then look for coreqs
         coreqs = find_sub_reqs_wrapper(infomap["Pre- or corequisites"].find("ul", recursive=True)).return_info()
     if "Note(s)" in infomap.keys():
-        notes = infomap["Note(s)"].text
+        notes = infomap["Note(s)"].find("div").text
 
+    # Map of information of a class
     final_info_map = {
 
         "CourseCode": class_code_title_map["class code"],
-            #get_class_code(soup.find("title")),
         "CourseName": class_code_title_map["class name"],
         "CourseDescription": course_description,
         "Units": units,
@@ -211,15 +218,15 @@ def get_class_notes(source_soup) -> list:
 def get_class_description(description) -> str:
     return description.find("div").text
 
+
 def get_class_code(soup):
     class_name_region = soup.find("div", class_="course-view__itemTitleAndTranslationButton___36N-_").text
     return utilities.fetch_course_code(class_name_region)
 
-#def check_titles_are_all_valid():
+
 
 # Returns a map with class code and description
 def get_class_name(class_name_region) -> dict:
-
 
     if class_name_region is not None:
         source_text = class_name_region.text
@@ -288,13 +295,14 @@ def get_departments(soup) -> str():
 
 
 def save_all_class_info():
-    with open("results.json", "w") as results_file:
+    with open("results.json", "w", encoding="ASCII") as results_file:
         list_of_class_maps = []
         os.chdir("./HTML")
         count = 0
         for filename in os.listdir("."):
             # print(filename)
             with open(filename, 'r', encoding="utf8") as html_file:
+
                 '''soup = BeautifulSoup(html_file, "lxml")
                 html_file.close()
                 source = soup.find("title")
