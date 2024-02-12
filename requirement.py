@@ -39,13 +39,13 @@ def determine_type(req_html):
 def reqtype_to_string(input_type):
     output = None
     if input_type == ReqType.COURSES:
-        return "Course"
+        return "course"
     if input_type == ReqType.REQUIREMENTS:
-        return "Requirement"
+        return "requirement"
     if input_type == ReqType.OTHER:
-        return "Other"
+        return "other"
     if input_type == ReqType.UNITS:
-        return "Units"
+        return "units"
 
 '''
 # Class for requirements. A requirement could be a singular class, a certain amount of 

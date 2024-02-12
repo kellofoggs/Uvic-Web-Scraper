@@ -1,4 +1,5 @@
 import os
+from pprint import pprint
 
 from bs4 import BeautifulSoup
 from enum import Enum, auto
@@ -92,23 +93,22 @@ def find_sub_reqs(html, is_head,parent_req = None):
     # Get the first list item in the html
     li_child = html.find("li", recursive=True)
 
-    # When we're not at the head node
-    if parent_req is not None:
+    # When we're not at the root node
+    if parent_req is not None and li_child not in visited_set:
+        parent_req.add_to_sub_reqs(current_req)
 
         # Case where we're at the leaf node in the HTML list tree (this generally results in a "course" req or "other" type of req
         if li_child is None:
 
             # If there are siblings run algorithm on siblings sibling no
-            parent_req.add_to_sub_reqs(current_req)
+
             return
 
         else:
 
             # Go down until we find the last level, every time we go down the node we visit is the head
-            parent_req.add_to_sub_reqs(current_req)
-            if html.siblings is None or len(html.siblings) <= 0:
+            #if html.siblings is None or len(html.siblings) <= 0:
 
-                parent_req.add_to_sub_reqs(current_req)
             find_sub_reqs(li_child, True, parent_req=current_req)
             return
     else:
@@ -120,6 +120,7 @@ def find_sub_reqs(html, is_head,parent_req = None):
 # Looks at sibling requirements in the same 'level' as current requirements
 
 def sideways_traversal(html, parent_req=None):
+
     siblings = html.find_next_siblings()
 
     if siblings is not None and len(siblings) > 0:
@@ -162,6 +163,7 @@ def get_data(source_html) -> dict:
         units = get_class_units(infomap["Units"])
     # Get the class code and class name
     class_code_title_map = get_class_name(soup.find("title"))
+
 
     if "Hours: lecture-lab-tutorial" in infomap.keys():
         hours = get_class_hours(infomap["Hours: lecture-lab-tutorial"])
@@ -320,33 +322,15 @@ def save_all_class_info():
         json.dump(list_of_class_maps, results_file, indent=2)
 
 
-local_html = open("./HTML/727.html")
-local_html = open("./HTML/703.html")
-local_html = open("./HTML/1006.html")
-local_html = open("./HTML/999.html")
-local_html = open("./HTML/1284.html")
-local_html  = open("./HTML/1041.html")
-# get_data((local_html))
+# local_html = open("./HTML/727.html")
+# local_html = open("./HTML/703.html")
+# local_html = open("./HTML/1006.html")
+# local_html = open("./HTML/999.html")
+# local_html = open("./HTML/1284.html")
+# local_html  = open("./HTML/1041.html")
+# local_html = open("C:\\Users\\Kelly\\PycharmProjects\\Uvic-Web-Scraper\\HTML\\1474.html")
+# pprint(get_data(local_html)["Prereqs"])
+
 save_all_class_info()
 
-is_number_of_units_regex = "\\(\\d\\.\\d\\)"
-is_number_of_units_regex = "\\([0-9\\.]+\\)"
-test_string = "MATH151 - Finite Mathematics (1.5)"
-x = re.findall(is_number_of_units_regex, test_string)
-#print(x)
 
-
-
-
-
-#data = get_data(local_html)
-
-#save_all_class_info()
-# class_code_regex = "^[A-Za-z\\-]+.*\\s{0,2}-\\s{0,2}[0-9]+$"
-
-class_code_regex = "^[A-Za-z\\-0-9]+"
-has_numerals_regex = "\\d"
-
-code = "EDCI307A - Art in the Elementary or Middle Classroom I (1.5)"
-x = re.findall(class_code_regex, code)
-#print(x)
