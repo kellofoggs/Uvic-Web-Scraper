@@ -115,6 +115,10 @@ class Requirement:
 
         #Split target string by spaces
         target_array = target_string.split(" ")
+        if target_array[1].__contains__("all"):
+            self.is_complete_all = True
+            return "0"
+
 
         return target_array[1]
 
@@ -122,7 +126,6 @@ class Requirement:
 
 
         # This allows for quantity to be incremented when sub-req is added
-        self.is_complete_all = True
 
         #Else
         self.quantity = suspected_quantity
@@ -163,6 +166,7 @@ class Requirement:
         self.name = "Complete"
 
 
+
         # find the quantity from the complete "of" line
         self.quantity = self.clean_up_reqs()
         # self.quantity = self.html.text
@@ -201,7 +205,10 @@ class Requirement:
     def add_to_sub_reqs(self, element):
         self.sub_reqs.append(element)
         self.sub_maps.append(element.return_info())
-
+        if (self.is_complete_all):
+            temp_quant = float(self.quantity)
+            temp_quant = temp_quant +1
+            self.quantity = str(temp_quant)
         #self.quantity = element.quantity + self.quantity
 
     def set_sub_reqs(self, in_array):
