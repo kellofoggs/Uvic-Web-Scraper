@@ -108,7 +108,7 @@ class Requirement:
     # Sets the quantity for a requirement type requirement
     def clean_up_reqs(self):
         target_string = self.html.text
-        suspected_quantity = "0"
+#suspected_quantity = "0"
 
         # Use KMP search algorithm to find where "Complete" is
         #location_of_complete = utilities.KMPSearch("Complete", target_string)
@@ -128,7 +128,7 @@ class Requirement:
         # This allows for quantity to be incremented when sub-req is added
 
         #Else
-        self.quantity = suspected_quantity
+        #self.quantity = suspected_quantity
 
         return
 
@@ -203,17 +203,16 @@ class Requirement:
 
 
     def add_to_sub_reqs(self, element):
+        if (element is not None and element.return_info()["name"] == "SENG265"):
+            print("Hello")
+
         self.sub_reqs.append(element)
         self.sub_maps.append(element.return_info())
-        if (self.is_complete_all):
+
+        if self.is_complete_all:
             temp_quant = float(self.quantity)
             temp_quant = temp_quant +1
             self.quantity = str(temp_quant)
-        #self.quantity = element.quantity + self.quantity
-
-    def set_sub_reqs(self, in_array):
-        self.sub_reqs = in_array
-        self.set_sub_maps()
-
-
+            # len()
+            # self.quantity = str(len(self.sub_maps))
 

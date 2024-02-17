@@ -76,7 +76,7 @@ def find_sub_reqs_wrapper(html):
 
 
 # For new find sub reqs go all the way down first then start making objects
-def find_sub_reqs(html, is_head,parent_req = None):
+def find_sub_reqs(html, is_branch_head, parent_req = None):
     # Generate a 'Requirement' object from the current HTML element that is a list item
     current_req = Requirement(html)
 
@@ -87,29 +87,30 @@ def find_sub_reqs(html, is_head,parent_req = None):
     visited_set.add(html)
 
     # Visit siblings if any
-    if is_head:
+    if is_branch_head:
         sideways_traversal(html, parent_req)
 
     # Get the first list item in the html
     li_child = html.find("li", recursive=True)
 
     # When we're not at the root node
-    if parent_req is not None and li_child not in visited_set:
-        parent_req.add_to_sub_reqs(current_req)
+    if parent_req is not None:
 
-        # Case where we're at the leaf node in the HTML list tree (this generally results in a "course" req or "other" type of req
+        # Case where we're at the leaf node in the HTML list tree (this generally results in a "course" req or "other"
+        # type of req
         if li_child is None:
+            parent_req.add_to_sub_reqs(current_req)
 
             # If there are siblings run algorithm on siblings sibling no
-
             return
 
         else:
 
             # Go down until we find the last level, every time we go down the node we visit is the head
-            #if html.siblings is None or len(html.siblings) <= 0:
 
             find_sub_reqs(li_child, True, parent_req=current_req)
+            parent_req.add_to_sub_reqs(current_req)
+
             return
     else:
         if li_child is not None:
@@ -155,10 +156,7 @@ def get_data(source_html) -> dict:
     course_description = None
     department = None
 
-    if "Prerequisites" in infomap.keys():
-        total_pre_reqs = infomap["Prerequisites"].find("ul", recursive=True)
-        req = (find_sub_reqs_wrapper(total_pre_reqs).return_info())
-        #print(req)
+
     if "Units" in infomap.keys():
         units = get_class_units(infomap["Units"])
     # Get the class code and class name
@@ -180,6 +178,13 @@ def get_data(source_html) -> dict:
         coreqs = find_sub_reqs_wrapper(infomap["Pre- or corequisites"].find("ul", recursive=True)).return_info()
     if "Note(s)" in infomap.keys():
         notes = infomap["Note(s)"].find("div").text
+
+    if class_code_title_map["class code"] == "CSC360":
+        print("")
+    if "Prerequisites" in infomap.keys():
+        total_pre_reqs = infomap["Prerequisites"].find("ul", recursive=True)
+        req = (find_sub_reqs_wrapper(total_pre_reqs).return_info())
+        #print(req)
 
     # Map of information of a class
     final_info_map = {
