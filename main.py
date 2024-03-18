@@ -1,22 +1,26 @@
 import os
-from pprint import pprint
-
+import bs4
 from bs4 import BeautifulSoup
-from enum import Enum, auto
-import unittest
-import requests
-import requirement
+import selenium_scraper
 from requirement import Requirement, ReqType
 import utilities
 import json
 import re
+
+
 proper_title_pattern = "\\s-\\s"
 # Set for DFS that is reinitialized whenever wrapper is called
 visited_set = None
 num_called = 0
 
-
-def find_sub_reqs_wrapper(html):
+'''
+Wrapper for recursive function "find_sub_reqs"
+@:return
+ returns a "requirement" object which is a multi-level dictionary of pre/co requisites
+@:parameter
+ html: a beautiful soup object used to parse HTML which the object has been given
+'''
+def find_sub_reqs_wrapper(html: bs4.BeautifulSoup):
     global visited_set
     visited_set = set()  ##reset visited set
     # req = find_sub_reqs_recursive_revised(html, False)
@@ -26,56 +30,15 @@ def find_sub_reqs_wrapper(html):
     return req
 
 
-
-
-# Modified dfs for pre req searching
-# Returns requirement object that knows its sub requirements
-
-'''def find_sub_reqs(html, is_head, parent_req=None) -> Requirement:
-    #print(html.name)
-    #print(html.text)
-    1
-    requirement = Requirement(html)
-
-    global visited_set
-
-    # Visit current node
-    visited_set.add(html)
-
-    # Visit siblings if any
-    if is_head:
-        sideways_traversal(html, parent_req)
-
-    # Get the first list item in the html
-    li_child = html.find("li", recursive=True)
-
-    # When we're not at the head node
-    if parent_req is not None:
-        # Case where we're at the leaf node in the HTML list tree
-        if li_child is None:
-            # If there are siblings run algorithm on siblings sibling no
-            parent_req.add_to_sub_reqs(requirement)
-            if html.siblings is None or len(html.siblings) <= 0:
-                parent_req.set_sub_maps()
-            return
-
-        else:
-
-            # Go down until we find the last level, every time we go down the node we visit is the head
-            parent_req.add_to_sub_reqs(requirement)
-            if html.siblings is None or len(html.siblings) <= 0:
-                parent_req.set_sub_maps()
-            find_sub_reqs(li_child, True, parent_req=requirement)
-            return
-    else:
-        if li_child is not None:
-
-            find_sub_reqs(li_child, True, parent_req=requirement)
-        return requirement
 '''
-
-
-# For new find sub reqs go all the way down first then start making objects
+Recursive function for finding all the sub reqs of a requirement and adding them to "requirement" object fields
+@:parameter
+ html: a beautiful soup object that represents the HTML of the item currently being looked at
+ is_branch_head: a boolean that tells whether or not the current item is the first in its level
+ parent_req: A reference to another "requirement" object that the current requirement is a sub-requirement to
+@:return
+ The head requirement object which must be fulfilled dby fulfilling its sub reqs.
+'''
 def find_sub_reqs(html, is_branch_head, parent_req = None):
     # Generate a 'Requirement' object from the current HTML element that is a list item
     current_req = Requirement(html)
@@ -118,14 +81,16 @@ def find_sub_reqs(html, is_branch_head, parent_req = None):
     return current_req
 
 
-# Looks at sibling requirements in the same 'level' as current requirements
-
+''' Looks at sibling requirements in the same 'level' as current requirements
+    @:argument
+    html: BeautifulSoup object that represents the 'head' of a level
+    parent_req: The parent of the prerequisites in the same level. Each level has 1 parent at most
+'''
 def sideways_traversal(html, parent_req=None):
 
     siblings = html.find_next_siblings()
 
     if siblings is not None and len(siblings) > 0:
-        # print("Same level")
         for element in siblings:
             new_element = element
             if new_element.name != "li":
@@ -135,7 +100,9 @@ def sideways_traversal(html, parent_req=None):
 
 
 
-
+'''
+Prepares a map for writing to a JSON file 
+'''
 def get_data(source_html) -> dict:
     # Start up beautiful soup and create a dictionary for holding different fields on the site
     soup = BeautifulSoup(source_html, "lxml")
@@ -178,9 +145,6 @@ def get_data(source_html) -> dict:
         coreqs = find_sub_reqs_wrapper(infomap["Pre- or corequisites"].find("ul", recursive=True)).return_info()
     if "Note(s)" in infomap.keys():
         notes = infomap["Note(s)"].find("div").text
-
-    if class_code_title_map["class code"] == "CSC360":
-        print("")
     if "Prerequisites" in infomap.keys():
         total_pre_reqs = infomap["Prerequisites"].find("ul", recursive=True)
         req = (find_sub_reqs_wrapper(total_pre_reqs).return_info())
@@ -218,8 +182,7 @@ def get_data(source_html) -> dict:
 def get_class_notes(source_soup) -> list:
     notes_list_head = source_soup.find("li")
     notes_lost = []
-    for thing in notes_list_head.next_siblings:
-        print("A")
+    #for thing in notes_list_head.next_siblings:
 
 
 def get_class_description(description) -> str:
@@ -275,6 +238,8 @@ def get_class_name(class_name_region) -> dict:
         "class name": "".join(class_desc)
     }'''
 
+    "".join()
+
 
 # Takes in the hours sections and returns a map with each section's hours required
 def get_class_hours(soup) -> dict:
@@ -300,7 +265,7 @@ def get_class_units(soup):
 def get_departments(soup) -> str():
     return soup.find("div").text
 
-
+# Saves all class info from pregened html files
 def save_all_class_info():
     with open("results.json", "w", encoding="ASCII") as results_file:
         list_of_class_maps = []
@@ -310,15 +275,7 @@ def save_all_class_info():
             # print(filename)
             with open(filename, 'r', encoding="utf8") as html_file:
 
-                '''soup = BeautifulSoup(html_file, "lxml")
-                html_file.close()
-                source = soup.find("title")
-                if source is None:
-                    1
-                source_text = source.text
-                match_found = re.search(proper_title_pattern, source_text)
-                if match_found is not None:
-                    count = count+1'''
+
                 #print(filename)
                 class_dict = get_data(html_file)
                 list_of_class_maps.append(class_dict)
@@ -327,15 +284,21 @@ def save_all_class_info():
         json.dump(list_of_class_maps, results_file, indent=2)
 
 
-# local_html = open("./HTML/727.html")
-# local_html = open("./HTML/703.html")
-# local_html = open("./HTML/1006.html")
-# local_html = open("./HTML/999.html")
-# local_html = open("./HTML/1284.html")
-# local_html  = open("./HTML/1041.html")
-# local_html = open("C:\\Users\\Kelly\\PycharmProjects\\Uvic-Web-Scraper\\HTML\\1474.html")
-# pprint(get_data(local_html)["Prereqs"])
+# save all class info from html gotten by selenium without saving on disk
+def save_class_info_inplace():
+    with open("results.json", "w", encoding="ASCII") as results_file:
+        list_of_class_maps = []
 
-save_all_class_info()
+        for link in selenium_scraper.get_all_class_links():
+            html_source = selenium_scraper.render_html(link)
+            class_dict = get_data(html_source)
+            list_of_class_maps.append(class_dict)
+        json.dump(list_of_class_maps, results_file, indent=2)
 
 
+
+
+# save_all_class_info()
+save_class_info_inplace()
+# re.search("\d+\\.*\d*
+# units of", "4.5 units of 300- or 400-level GNDR or WS courses")

@@ -86,7 +86,7 @@ def render_html(url):
     element_present = EC.presence_of_element_located((By.CLASS_NAME, 'noBreak'))
     WebDriverWait(driver, timeout=10000).until(element_present)
     ##  wanted_component = driver.find_element(By.CLASS_NAME, 'noBreak')
-    print(driver.find_element(By.CLASS_NAME, "course-view__itemTitleAndTranslationButton___36N-_").text)
+    # print(driver.find_element(By.CLASS_NAME, "course-view__itemTitleAndTranslationButton___36N-_").text)
 
     ##Take rendered html_and pass it onto beautiful soup for ability to turn off recursive children search
     ##print(driver.page_source)
@@ -97,7 +97,10 @@ def render_html(url):
 def get_all_class_links():
     ##keep in selenium so webpage still interactable
     browser_options = webdriver.EdgeOptions()
-    browser_options.headless = False
+    # browser_options.add_argument("--headless=new")
+
+    # browser_options.headless = True
+
     driver = webdriver.Edge(browser_options)
 
     all_class_main_page_url = 'https://www.uvic.ca/calendar/undergrad/index.php#/courses'
@@ -112,31 +115,16 @@ def get_all_class_links():
     program_list = driver.find_element(By.CLASS_NAME, 'style__groups___NnCy6').find_elements(By.TAG_NAME, 'li')
     master_class_links_list = []
     for program in program_list:
-        ##Click the drop down button to get to the stuff
-        #button = thing.find_element(By.TAG_NAME, 'button')
-        ##click dropdown buttons
-        #button.click()
-        print(program.text)
+
 
         program.click()
-        #class_lists = thing.find_elements(By.TAG_NAME)
         driver.implicitly_wait(2)
         course_list= program.find_element(By.TAG_NAME, 'ul')
         course_links =  course_list.find_elements(By.TAG_NAME, "a")
         for link_element in course_links:
             master_class_links_list.append(link_element.get_attribute("href"))
 
-        ##print(thing.text)
-        ##We want to wait for all the drop down elements to load
-        ##Drop down elements have following form
-    ##print(len(list_of_links))
 
-    ##print(master_class_links_list)
-    ##for
-
-    ##soup = render_html(all_class_main_page_url)
-
-    ##main_header = soup.find('')
     return master_class_links_list
 
 def save_all_links():
@@ -162,5 +150,5 @@ data = get_data(local_html)
 '''
 ##save_html(render_html(url))
 #get_all_class_links()
-##save_all_links()
-save_all_class_htmls()
+# save_all_links()
+# save_all_class_htmls()

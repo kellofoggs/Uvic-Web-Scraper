@@ -1018,6 +1018,7 @@ https://www.uvic.ca/calendar/undergrad/index.php#/courses/BJAFguam4?bc=true&bcCu
 https://www.uvic.ca/calendar/undergrad/index.php#/courses/S1ycx_pm4?bc=true&bcCurrent=ECE496B%20-%20Selected%20Topics%20in%20Electrical%20and%20Computer%20Engineering&bcGroup=Electrical%20and%20Computer%20Engineering%20(ECE)&bcItemType=courses
 https://www.uvic.ca/calendar/undergrad/index.php#/courses/H1ek9g_6XV?bc=true&bcCurrent=ECE496C%20-%20Selected%20Topics%20in%20Electrical%20and%20Computer%20Engineering&bcGroup=Electrical%20and%20Computer%20Engineering%20(ECE)&bcItemType=courses
 https://www.uvic.ca/calendar/undergrad/index.php#/courses/Byy5xdaXV?bc=true&bcCurrent=ECE496D%20-%20Selected%20Topics%20in%20Electrical%20and%20Computer%20Engineering&bcGroup=Electrical%20and%20Computer%20Engineering%20(ECE)&bcItemType=courses
+https://www.uvic.ca/calendar/undergrad/index.php#/courses/B13WHWVpj?bc=true&bcCurrent=ECE497%20-%20Thesis&bcGroup=Electrical%20and%20Computer%20Engineering%20(ECE)&bcItemType=courses
 https://www.uvic.ca/calendar/undergrad/index.php#/courses/Sk19gd6XE?bc=true&bcCurrent=ECE498%20-%20Honours%20Thesis&bcGroup=Electrical%20and%20Computer%20Engineering%20(ECE)&bcItemType=courses
 https://www.uvic.ca/calendar/undergrad/index.php#/courses/Byg9luamV?bc=true&bcCurrent=ECE499%20-%20Design%20Project%20II&bcGroup=Electrical%20and%20Computer%20Engineering%20(ECE)&bcItemType=courses
 https://www.uvic.ca/calendar/undergrad/index.php#/courses/HkgX5mup7E?bc=true&bcCurrent=ENGR001%20-%20Work%20Term%201&bcGroup=Engineering%20(ENGR)&bcItemType=courses
@@ -1614,6 +1615,7 @@ https://www.uvic.ca/calendar/undergrad/index.php#/courses/rJQv8damV?bc=true&bcCu
 https://www.uvic.ca/calendar/undergrad/index.php#/courses/HJHwUd6Q4?bc=true&bcCurrent=GRS348%20-%20The%20Ancient%20City%20of%20Rome&bcGroup=Greek%20and%20Roman%20Studies%20(GRS)&bcItemType=courses
 https://www.uvic.ca/calendar/undergrad/index.php#/courses/rkDv8OaQV?bc=true&bcCurrent=GRS349%20-%20Jews%20and%20Christians%20in%20the%20Greek%20and%20Roman%20World&bcGroup=Greek%20and%20Roman%20Studies%20(GRS)&bcItemType=courses
 https://www.uvic.ca/calendar/undergrad/index.php#/courses/H1_wIdTQN?bc=true&bcCurrent=GRS350%20-%20The%20Transformation%20of%20the%20Late%20Roman%20World&bcGroup=Greek%20and%20Roman%20Studies%20(GRS)&bcItemType=courses
+https://www.uvic.ca/calendar/undergrad/index.php#/courses/HyrseNO2o?bc=true&bcCurrent=GRS352%20-%20Bad%20Emperors&bcGroup=Greek%20and%20Roman%20Studies%20(GRS)&bcItemType=courses
 https://www.uvic.ca/calendar/undergrad/index.php#/courses/ByFDLuT7E?bc=true&bcCurrent=GRS355%20-%20Love%2C%20Sex%2C%20and%20the%20Body%20in%20the%20Ancient%20World&bcGroup=Greek%20and%20Roman%20Studies%20(GRS)&bcItemType=courses
 https://www.uvic.ca/calendar/undergrad/index.php#/courses/HJzQAKXYB?bc=true&bcCurrent=GRS358%20-%20The%20Ancient%20City%20of%20Athens&bcGroup=Greek%20and%20Roman%20Studies%20(GRS)&bcItemType=courses
 https://www.uvic.ca/calendar/undergrad/index.php#/courses/SySXWPJ4B?bc=true&bcCurrent=GRS360%20-%20Experiential%20Learning&bcGroup=Greek%20and%20Roman%20Studies%20(GRS)&bcItemType=courses
@@ -3236,7 +3238,6 @@ https://www.uvic.ca/calendar/undergrad/index.php#/courses/BymclFTm4?bc=true&bcCu
 https://www.uvic.ca/calendar/undergrad/index.php#/courses/S14qxFTQE?bc=true&bcCurrent=SPAN249%20-%20Intensive%20Intermediate%20Spanish&bcGroup=Spanish%20(SPAN)&bcItemType=courses
 https://www.uvic.ca/calendar/undergrad/index.php#/courses/HkBceY6mE?bc=true&bcCurrent=SPAN250A%20-%20Intermediate%20Spanish%20I&bcGroup=Spanish%20(SPAN)&bcItemType=courses
 https://www.uvic.ca/calendar/undergrad/index.php#/courses/ryxr5xFTmE?bc=true&bcCurrent=SPAN250B%20-%20Intermediate%20Spanish%20II&bcGroup=Spanish%20(SPAN)&bcItemType=courses
-https://www.uvic.ca/calendar/undergrad/index.php#/courses/SyDceYTQE?bc=true&bcCurrent=SPAN270%20-%20Introduction%20to%20Hispanic%20Literature&bcGroup=Spanish%20(SPAN)&bcItemType=courses
 https://www.uvic.ca/calendar/undergrad/index.php#/courses/B1_cgKTmN?bc=true&bcCurrent=SPAN280%20-%20Spanish%20Immersion&bcGroup=Spanish%20(SPAN)&bcItemType=courses
 https://www.uvic.ca/calendar/undergrad/index.php#/courses/ryc5lKaX4?bc=true&bcCurrent=SPAN304%20-%20Indigenous%20Latin%20America%2C%20Eco%20and%20Social%20Justice%20(in%20English)&bcGroup=Spanish%20(SPAN)&bcItemType=courses
 https://www.uvic.ca/calendar/undergrad/index.php#/courses/SyqnWKp7E?bc=true&bcCurrent=SPAN305A%20-%20Upper%20Intermediate%20Topics%20in%20Hispanic%20Culture%20(in%20English)&bcGroup=Spanish%20(SPAN)&bcItemType=courses

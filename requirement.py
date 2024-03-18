@@ -25,7 +25,8 @@ def determine_type(req_html):
     if req_html.text.__contains__("Complete") or req_html.text.__contains__("complete"):
         return ReqType.REQUIREMENTS
 
-    if req_html.text.__contains__("units of"):
+
+    if re.match("\\d+\\.*\\d* units of", req_html.text):
         return ReqType.UNITS
 
 
@@ -138,6 +139,22 @@ class Requirement:
 
     def clean_up_units(self, soup):
         self.quantity = self.html.text
+        parse_array = self.html.text.split(" ")
+        self.quantity = parse_array[0]
+        ['6', 'units', 'of', '400-level', 'BME,', 'CENG,', 'CIVE,', 'CSC,', 'ELEC,', 'ECE,', '', 'ENGR,', 'MECH,', 'or',
+         'SENG', 'courses.']
+
+        # for i in range(2, len(parse_array)):
+            # If we see an "or" we know the next thing is a different program
+            # unit_map = {"Program": None,
+            #             "Level": None,
+            #             "GPA-Required": None
+            #             }
+            # self.sub_maps.append(unit_map)
+
+
+        print(parse_array)
+
         return
 
 
@@ -203,8 +220,8 @@ class Requirement:
 
 
     def add_to_sub_reqs(self, element):
-        if (element is not None and element.return_info()["name"] == "SENG265"):
-            print("Hello")
+        # if (element is not None and element.return_info()["name"] == "SENG265"):
+        #     print("Hello")
 
         self.sub_reqs.append(element)
         self.sub_maps.append(element.return_info())
