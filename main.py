@@ -298,7 +298,7 @@ def save_class_info_inplace():
 
 
 
-# save_all_class_info()
-save_class_info_inplace()
+save_all_class_info()
+# save_class_info_inplace()
 # re.search("\d+\\.*\d*
 # units of", "4.5 units of 300- or 400-level GNDR or WS courses")
