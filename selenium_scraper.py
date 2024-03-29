@@ -75,11 +75,8 @@ def get_data(source_html) -> list:
 
 
 
-
-def render_html(url):
-    browser_options = webdriver.EdgeOptions()
-    browser_options.headless = False
-    driver = webdriver.Edge(browser_options)
+# Render html for single url, creates new browser options and driver each time
+def render_html(url, browser_options= webdriver.EdgeOptions(), driver= webdriver.Edge()):
 
     driver.get(url)
     ##Wait until noBreak sections appear (sections with content we want)
@@ -135,12 +132,16 @@ def save_all_links():
         txt_file.close()
 
 def save_all_class_htmls():
+    browser_options = webdriver.EdgeOptions()
+    browser_options.headless = False
+
+    driver = webdriver.Edge(browser_options)
    ## links_file = open("links.txt")
 
     with open("links.txt") as links_file:
 
         for line in links_file:
-            save_html(render_html(line))
+            save_html(render_html(line, browser_options, driver))
 
 ##url = 'https://www.uvic.ca/calendar/undergrad/index.php#/courses/Syd5kOaQV?bc=true&bcCurrent=CSC205%20-%202D%20Computer%20Graphics%20and%20Image%20Processing&bcGroup=Computer%20Science%20(CSC)&bcItemType=courses '
 url = 'https://www.uvic.ca/calendar/undergrad/index.php#/courses/r1uCgFTXN?bc=true&bcCurrent=STAT261%20-%20Introduction%20to%20Probability%20and%20Statistics%20II&bcGroup=Statistics%20(STAT)&bcItemType=courses'
@@ -151,4 +152,4 @@ data = get_data(local_html)
 ##save_html(render_html(url))
 #get_all_class_links()
 # save_all_links()
-# save_all_class_htmls()
+save_all_class_htmls()

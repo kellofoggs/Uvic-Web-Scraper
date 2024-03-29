@@ -214,7 +214,7 @@ class Requirement:
 
             ##"sub reqs": self.sub_reqs,
             ##'sub req names': [x in self.sub_reqs.name]
-            "sub maps": self.sub_maps
+            "sub_maps": self.sub_maps
         }
         return my_info
 

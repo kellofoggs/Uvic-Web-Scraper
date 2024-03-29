@@ -153,17 +153,17 @@ def get_data(source_html) -> dict:
     # Map of information of a class
     final_info_map = {
 
-        "CourseCode": class_code_title_map["class code"],
-        "CourseName": class_code_title_map["class name"],
-        "CourseDescription": course_description,
-        "Units": units,
-        "Hours": hours,
-        "Notes": notes,
-        "Department": department,
+        "courseCode": class_code_title_map["class code"],
+        "courseName": class_code_title_map["class name"],
+        "courseDescription": course_description,
+        "units": units,
+        "hours": hours,
+        "notes": notes,
+        "department": department,
 
-        "Prereqs": req,
+        "prereqs": req,
         # Not every course has coreqs so initialize as empty map first
-        "Coreqs": coreqs
+        "coreqs": coreqs
 
     }
     # print(infomap["Hours: lecture-lab-tutorial"].text)
