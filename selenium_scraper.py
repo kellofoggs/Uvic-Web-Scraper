@@ -1,4 +1,5 @@
 import re
+import time
 
 import bs4
 import selenium.webdriver as webdriver
@@ -43,7 +44,6 @@ Selenium is here as dynamic/javascript sites won't load properly without a brows
 def render_html(url, driver, first=True):
 
     driver.get(url)
-    driver.refresh()
 
     # if not first:
     #     element = driver.find_element(By.CLASS_NAME, 'course-view__itemTitleAndTranslationButton___36N-_')
@@ -59,7 +59,18 @@ def render_html(url, driver, first=True):
     print(driver.find_element(By.TAG_NAME, 'h2').text)
     ##Take rendered html_and pass it onto beautiful soup for ability to turn off recursive children search
     soup_understands = driver.page_source
+    old_tab = driver.current_window_handle
+    assert len(driver.window_handles) == 1
 
+    driver.switch_to.new_window('tab')
+    new_tab = driver.current_window_handle
+
+    wait.until(EC.number_of_windows_to_be(2))
+
+
+    driver.switch_to.window(old_tab)
+    driver.close()
+    driver.switch_to.window(new_tab)
 
 
     return soup_understands
@@ -128,23 +139,20 @@ def save_all_class_htmls():
                 print(research.group())
             # if i == 0 or i == len(lines) -1:
             save_html(render_html(link, driver), research.group())
-            # old_tab = driver.current_window_handle
-            # assert len(driver.window_handles) == 1
+            # else:
+            #     save_html(render_html(link, False), research.group())
+
+            # driver.execute_script("window.sessionStorage.clear()")
             #
-            # driver.switch_to.new_window('tab')
-            # new_tab = driver.current_window_handle
-            #
-            # # wait.until(EC.number_of_windows_to_be(2))
-            #
-            # driver.switch_to.window(old_tab)
-            # driver.close()
-            # driver.switch_to.window(new_tab)
+            # driver.execute_script("window.localStorage.clear()")
+            # driver.delete_all_cookies()
+
 def create_web_driver() :
     browser_options = webdriver.FirefoxOptions()
     # browser_options = webdriver.EdgeOptions()
     browser_options.headless = False
     browser_options.add_argument('--guest')
-    driver = webdriver.Firefox(options=browser_options)
+    driver = webdriver.Edge(options=browser_options)
     webdrivers.append(driver)
     return driver
 
