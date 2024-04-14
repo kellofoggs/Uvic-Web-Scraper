@@ -59,8 +59,6 @@ class Requirement:
 
     #What type of requirement the requirement is, types listed in ReqType Enum
     type = None
-
-    course_code = None
     course_description = None
     name = None
     sub_reqs = None
@@ -72,7 +70,7 @@ class Requirement:
     alphanumeric_window = []
 
     # Constructor for requirement call
-    def __init__(self, doc):
+    def __init__(self, doc, req_course_list):
         self.type = determine_type(doc)
         self.name = doc.text
         self.html = doc
@@ -84,6 +82,9 @@ class Requirement:
             self.prep_for_reqs()
         elif self.type == ReqType.COURSES:
             self.prep_for_courses()
+            # print(req_course_list)
+            if self.name not in req_course_list:
+                req_course_list.append(self.name)
 
         elif self.type == ReqType.UNITS:
             self.prep_for_units()
@@ -141,19 +142,10 @@ class Requirement:
         self.quantity = self.html.text
         parse_array = self.html.text.split(" ")
         self.quantity = parse_array[0]
-        ['6', 'units', 'of', '400-level', 'BME,', 'CENG,', 'CIVE,', 'CSC,', 'ELEC,', 'ECE,', '', 'ENGR,', 'MECH,', 'or',
-         'SENG', 'courses.']
+        # ['6', 'units', 'of', '400-level', 'BME,', 'CENG,', 'CIVE,', 'CSC,', 'ELEC,', 'ECE,', '', 'ENGR,', 'MECH,', 'or',
+        #  'SENG', 'courses.']
 
-        # for i in range(2, len(parse_array)):
-            # If we see an "or" we know the next thing is a different program
-            # unit_map = {"Program": None,
-            #             "Level": None,
-            #             "GPA-Required": None
-            #             }
-            # self.sub_maps.append(unit_map)
-
-
-        print(parse_array)
+        # print(parse_array)
 
         return
 
@@ -166,7 +158,6 @@ class Requirement:
             for requirement in self.sub_reqs:
                 # print(requirement.html.text)
                 self.sub_maps.append(requirement.return_info())
-        #self.clean_up_quantity(self.html)
 
     def prep_for_other(self):
         return
@@ -175,9 +166,7 @@ class Requirement:
         self.name = utilities.fetch_course_code(self.html.text)
 
         self.quantity = self.clean_up_course_quantity(self.html)
-        #self.fetch_course_title()
 
-        #self.fetch_course_units()
 
     def prep_for_reqs(self):
         self.name = "Complete"
@@ -200,7 +189,7 @@ class Requirement:
     def print_info(self):
         my_info = self.return_info()
 
-        print(my_info)
+        # print(my_info)
         # print(self.html.text)
 
 
@@ -209,20 +198,13 @@ class Requirement:
         my_info = {
             "type": reqtype_to_string(self.type),
             "name": self.name,
-            ##"course_title": self.course_title,
             "quantity": self.quantity,
-
-            ##"sub reqs": self.sub_reqs,
-            ##'sub req names': [x in self.sub_reqs.name]
             "sub_maps": self.sub_maps
         }
         return my_info
 
 
     def add_to_sub_reqs(self, element):
-        # if (element is not None and element.return_info()["name"] == "SENG265"):
-        #     print("Hello")
-
         self.sub_reqs.append(element)
         self.sub_maps.append(element.return_info())
 
@@ -230,6 +212,3 @@ class Requirement:
             temp_quant = float(self.quantity)
             temp_quant = temp_quant +1
             self.quantity = str(temp_quant)
-            # len()
-            # self.quantity = str(len(self.sub_maps))
-

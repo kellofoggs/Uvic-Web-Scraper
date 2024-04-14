@@ -6,12 +6,15 @@ from requirement import Requirement, ReqType
 import utilities
 import json
 import re
+import selenium.webdriver as webdriver
+
 
 
 proper_title_pattern = "\\s-\\s"
 # Set for DFS that is reinitialized whenever wrapper is called
 visited_set = None
 num_called = 0
+req_course_list = []
 
 '''
 Wrapper for recursive function "find_sub_reqs"
@@ -23,10 +26,15 @@ Wrapper for recursive function "find_sub_reqs"
 def find_sub_reqs_wrapper(html: bs4.BeautifulSoup):
     global visited_set
     visited_set = set()  ##reset visited set
-    # req = find_sub_reqs_recursive_revised(html, False)
+
+    global req_course_list  ## Reset req_course_list
+    req_course_list = []
+
     if html.name != "li":
         html = html.find("li")
+
     req = find_sub_reqs(html, True)
+
     return req
 
 
@@ -41,7 +49,8 @@ Recursive function for finding all the sub reqs of a requirement and adding them
 '''
 def find_sub_reqs(html, is_branch_head, parent_req = None):
     # Generate a 'Requirement' object from the current HTML element that is a list item
-    current_req = Requirement(html)
+    global req_course_list
+    current_req = Requirement(html, req_course_list)
 
     # Bring in the visited set from global scope
     global visited_set
@@ -122,6 +131,7 @@ def get_data(source_html) -> dict:
     notes = None
     course_description = None
     department = None
+    units = None
 
 
     if "Units" in infomap.keys():
@@ -163,7 +173,8 @@ def get_data(source_html) -> dict:
 
         "prereqs": req,
         # Not every course has coreqs so initialize as empty map first
-        "coreqs": coreqs
+        "coreqs": coreqs,
+        "prereqCourses": req_course_list
 
     }
     # print(infomap["Hours: lecture-lab-tutorial"].text)
@@ -288,7 +299,9 @@ def save_all_class_info():
 def save_class_info_inplace():
     with open("results.json", "w", encoding="ASCII") as results_file:
         list_of_class_maps = []
-
+        # browser_options = webdriver.EdgeOptions()
+        # browser_options.headless= False
+        # driver = webdriver.Edge()
         for link in selenium_scraper.get_all_class_links():
             html_source = selenium_scraper.render_html(link)
             class_dict = get_data(html_source)
