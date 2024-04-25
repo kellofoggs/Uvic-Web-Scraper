@@ -5,6 +5,7 @@ import bs4
 import selenium.webdriver as webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.common.exceptions import TimeoutException
 from bs4 import BeautifulSoup
 from enum import Enum, auto
 import codecs
@@ -44,7 +45,7 @@ Selenium is here as dynamic/javascript sites won't load properly without a brows
 def render_html(url, driver, first=True):
 
     driver.get(url)
-
+    driver.refresh()
     # if not first:
     #     element = driver.find_element(By.CLASS_NAME, 'course-view__itemTitleAndTranslationButton___36N-_')
     element = (By.CLASS_NAME, 'course-view__itemTitleAndTranslationButton___36N-_')
@@ -59,26 +60,25 @@ def render_html(url, driver, first=True):
     print(driver.find_element(By.TAG_NAME, 'h2').text)
     ##Take rendered html_and pass it onto beautiful soup for ability to turn off recursive children search
     soup_understands = driver.page_source
-    old_tab = driver.current_window_handle
-    assert len(driver.window_handles) == 1
-
-    driver.switch_to.new_window('tab')
-    new_tab = driver.current_window_handle
-
-    wait.until(EC.number_of_windows_to_be(2))
-
-
-    driver.switch_to.window(old_tab)
-    driver.close()
-    driver.switch_to.window(new_tab)
+    # old_tab = driver.current_window_handle
+    # assert len(driver.window_handles) == 1
+    #
+    # driver.switch_to.new_window('tab')
+    # new_tab = driver.current_window_handle
+    #
+    # wait.until(EC.number_of_windows_to_be(2))
+    #
+    #
+    # driver.switch_to.window(old_tab)
+    # driver.close()
+    # driver.switch_to.window(new_tab)
 
 
     return soup_understands
 
 
 def get_all_class_links():
-    global browser_options
-    global driver
+    driver, driver_ops = create_web_driver()
 
     all_class_main_page_url = 'https://www.uvic.ca/calendar/undergrad/index.php#/courses'
     driver.implicitly_wait(10)
@@ -117,7 +117,8 @@ def save_all_links():
 
 def save_all_class_htmls():
 
-    driver = create_web_driver()
+    driver, driver_ops = create_web_driver()
+
     # browser_options = webdriver.EdgeOptions()
     # browser_options.headless = False
     # browser_options.add_argument("--guest")
@@ -138,7 +139,10 @@ def save_all_class_htmls():
                 # print(line)
                 print(research.group())
             # if i == 0 or i == len(lines) -1:
-            save_html(render_html(link, driver), research.group())
+            try:
+                save_html(render_html(link, driver), research.group())
+            except TimeoutException:
+                pass
             # else:
             #     save_html(render_html(link, False), research.group())
 
@@ -149,19 +153,23 @@ def save_all_class_htmls():
 
 def create_web_driver() :
     browser_options = webdriver.FirefoxOptions()
-    # browser_options = webdriver.EdgeOptions()
-    browser_options.headless = False
-    browser_options.add_argument('--guest')
-    driver = webdriver.Edge(options=browser_options)
-    webdrivers.append(driver)
-    return driver
 
+    # browser_options = webdriver.EdgeOptions()
+    # browser_options.headless = False
+    # browser_options.add_argument('--guest')
+    browser_options.add_argument('--headless')
+    # browser_options.headless = True
+    driver = webdriver.Firefox(options=browser_options)
+    webdrivers.append(driver)
+    return driver, browser_options
+
+# save_all_class_htmls()
 # url = 'https://www.uvic.ca/calendar/undergrad/index.php#/courses/r1uCgFTXN?bc=true&bcCurrent=STAT261%20-%20Introduction%20to%20Probability%20and%20Statistics%20II&bcGroup=Statistics%20(STAT)&bcItemType=courses'
 
 ##save_html(render_html(url))
 # get_all_class_links()
 # save_all_links()
-save_all_class_htmls()
+# save_all_class_htmls()
 # save_all_class_htmls()
 # driver.get("https://www.uvic.ca/calendar/undergrad/index.php#/courses/HJsvjl1TB?bc=true&bcCurrent=ATWP135%20-%20Academic%20Reading%20and%20Writing&bcGroup=Academic%20and%20Technical%20Writing%20Program%20(ATWP)&bcItemType=courses")
 # driver.implicitly_wait(10000000000)

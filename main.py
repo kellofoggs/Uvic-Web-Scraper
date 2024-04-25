@@ -30,8 +30,10 @@ def find_sub_reqs_wrapper(html: bs4.BeautifulSoup):
     global req_course_list  ## Reset req_course_list
     req_course_list = []
 
-    if html.name != "li":
-        html = html.find("li")
+    # Find the first list in pre reqs section, we don't have to worry about edge case in recursive function here
+    if html.name != "ul":
+        html = html.find("ul")
+
 
     req = find_sub_reqs(html, True)
 
@@ -47,11 +49,58 @@ Recursive function for finding all the sub reqs of a requirement and adding them
 @:return
  The head requirement object which must be fulfilled dby fulfilling its sub reqs.
 '''
+# Encountered edge case, seems that beautiful soup uses dfs by default to search for tags
+# Therefore it may find a case like :
+'''
+<ul>
+    <div>
+        <span>
+
+        </span>
+        <li>
+            <span>Complete <!-- -->1<!-- --> of the following</span>
+            <ul>
+                <li data-test="ruleView-A.1">
+                    <div data-test="ruleView-A.1-result">
+                        <div>Foundations of Math 12</div>
+                    </div>
+                </li>
+                <li data-test="ruleView-A.2"><div data-test="ruleView-A.2-result">
+                    <div>
+                        Mathematics 12</div>
+                    </div>
+                </li>
+                <li data-test="ruleView-A.3">
+                    <div 
+                        data-test="ruleView-A.3-result">
+                        <div>Pre-Calculus 12</div>
+                    </div>
+                </li>
+            </ul>
+        </li>
+    </div>
+    <li data-test="ruleView-D">
+        <div data-test="ruleView-D-result">Complete <span>1</span> of: <div>
+            <ul style="margin-top:5px;margin-bottom:5px">
+                <li><span><a href="#/courses/view/63168b42bee727d381e640aa">MATH100</a> <!-- -->-<!-- --> <!-- -->Calculus I<!-- --> <span style="margin-left:5px">(1.5)</span></span></li>
+                <li><span><a href="#/courses/view/63168c6ccdd330aecb502b3d">MATH102</a> <!-- -->-<!-- --> <!-- -->Calculus for Students in the Social and Biological Sciences<!-- --> <span style="margin-left:5px">(1.5)</span></span></li>
+                <li><span><a href="#/courses/view/63168d043e376f0b1f621ffd">MATH109</a> <!-- -->-<!-- --> <!-- -->Introduction to Calculus<!-- --> <span style="margin-left:5px">(1.5)</span></span></li>
+                <li><span><a href="#/courses/view/63168d5cbee7272a8be640b9">MATH120</a> <!-- -->-<!-- --> <!-- -->Precalculus Mathematics<!-- --> <span style="margin-left:5px">(1.5)</span></span></li>
+            </ul>
+        </div>
+    </div>
+    </li>
+</ul>
+'''
+# Where the div path is followed, and the li in the same level is ignored.
 def find_sub_reqs(html, is_branch_head, parent_req = None):
     # Generate a 'Requirement' object from the current HTML element that is a list item
     global req_course_list
-    current_req = Requirement(html, req_course_list)
 
+    current_req = Requirement(html, req_course_list)
+    # print(html.find_all(recursive=False))
+
+    resolve_tree(html, 0)
     # Bring in the visited set from global scope
     global visited_set
 
@@ -89,6 +138,34 @@ def find_sub_reqs(html, is_branch_head, parent_req = None):
             find_sub_reqs(li_child, True, parent_req=current_req)
     return current_req
 
+
+def resolve_tree(html, level):
+    # print(html)
+    possible_subs = html.find_all(recursive=False)
+    list_under = False
+    list_is = []
+
+    # Check in same level first
+    for i in range(0, len(possible_subs)):
+        sub = possible_subs[i]
+        print(sub)
+        if sub.find("li") is None:
+            print("No sub lists")
+            continue
+        if sub.name in ["ul", "li"]:
+            list_under = True
+            list_is.append(i)
+            return level
+            # Stop at the first list in level
+            break
+            print("There's a list somewhere")
+
+
+
+
+    print("\n\n")
+
+    pass
 
 ''' Looks at sibling requirements in the same 'level' as current requirements
     @:argument
@@ -173,8 +250,8 @@ def get_data(source_html) -> dict:
 
         "prereqs": req,
         # Not every course has coreqs so initialize as empty map first
-        "coreqs": coreqs,
-        "prereqCourses": req_course_list
+        "coreqs": coreqs#,
+        # "prereqCourses": req_course_list
 
     }
     # print(infomap["Hours: lecture-lab-tutorial"].text)
@@ -310,8 +387,10 @@ def save_class_info_inplace():
 
 
 
-
-save_all_class_info()
+fi = open('HTML/Current=CSC110%20-%20Fundamentals%20of%20Programming%20I&bcGroup=Computer%20Science%20')
+class_dict = get_data(fi)
+print(class_dict)
+# save_all_class_info()
 # save_class_info_inplace()
 # re.search("\d+\\.*\d*
 # units of", "4.5 units of 300- or 400-level GNDR or WS courses")
