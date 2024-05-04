@@ -189,7 +189,7 @@ class Requirement:
     def print_info(self):
         my_info = self.return_info()
 
-        # print(my_info)
+        print(my_info)
         # print(self.html.text)
 
 

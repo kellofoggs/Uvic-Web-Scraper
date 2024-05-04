@@ -8,8 +8,6 @@ import json
 import re
 import selenium.webdriver as webdriver
 
-
-
 proper_title_pattern = "\\s-\\s"
 # Set for DFS that is reinitialized whenever wrapper is called
 visited_set = None
@@ -23,6 +21,8 @@ Wrapper for recursive function "find_sub_reqs"
 @:parameter
  html: a beautiful soup object used to parse HTML which the object has been given
 '''
+
+
 def find_sub_reqs_wrapper(html: bs4.BeautifulSoup):
     global visited_set
     visited_set = set()  ##reset visited set
@@ -30,13 +30,14 @@ def find_sub_reqs_wrapper(html: bs4.BeautifulSoup):
     global req_course_list  ## Reset req_course_list
     req_course_list = []
 
-    # Find the first list in pre reqs section, we don't have to worry about edge case in recursive function here
-    if html.name != "ul":
-        html = html.find("ul")
+    # # Find the first list in pre reqs section, we don't have to worry about edge case in recursive function here
+    # if html.name != "ul":
+    #     html = html.find("ul")
 
+    html = bfs_find(html, ["li"])
 
-    req = find_sub_reqs(html, True)
-
+    req = find_sub_reqs_revision(html, True)
+    # req.print_info()
     return req
 
 
@@ -92,15 +93,66 @@ Recursive function for finding all the sub reqs of a requirement and adding them
     </li>
 </ul>
 '''
-# Where the div path is followed, and the li in the same level is ignored.
-def find_sub_reqs(html, is_branch_head, parent_req = None):
+#
+#
+# # Where the div path is followed, and the li in the same level is ignored.
+# def find_sub_reqs(html, is_branch_head, parent_req=None):
+#     # Generate a 'Requirement' object from the current HTML element that is a list item
+#     global req_course_list
+#     # print(html)
+#     current_req = Requirement(html, req_course_list)
+#
+#     # print(html.find_all(recursive=False))
+#
+#     resolve_tree(html, 0)
+#     # Bring in the visited set from global scope
+#     global visited_set
+#
+#     # Visit current node
+#     visited_set.add(html)
+#
+#     # Visit siblings if any
+#     if is_branch_head:
+#         sideways_traversal(html, parent_req)
+#
+#     # Get the first list item in the html
+#     li_child = html.find("li", recursive=True)
+#
+#     # When we're not at the root node
+#     if parent_req is not None:
+#
+#         # Case where we're at the leaf node in the HTML list tree (this generally results in a "course" req or "other"
+#         # type of req
+#         if li_child is None:
+#             parent_req.add_to_sub_reqs(current_req)
+#
+#             # If there are siblings run algorithm on siblings sibling no
+#             return
+#
+#         else:
+#
+#             # Go down until we find the last level, every time we go down the node we visit is the head
+#
+#             find_sub_reqs(li_child, True, parent_req=current_req)
+#             parent_req.add_to_sub_reqs(current_req)
+#
+#             return
+#     else:
+#         if li_child is not None:
+#             find_sub_reqs(li_child, True, parent_req=current_req)
+#     return current_req
+
+
+# Assume that html is a ul or li item to start
+def find_sub_reqs_revision(html: bs4.BeautifulSoup, is_branch_head: bool, parent_req: Requirement = None):
     # Generate a 'Requirement' object from the current HTML element that is a list item
     global req_course_list
-
+    # print(html)
     current_req = Requirement(html, req_course_list)
+
     # print(html.find_all(recursive=False))
 
-    resolve_tree(html, 0)
+    # resolve_tree(html, 0)
     # Bring in the visited set from global scope
     global visited_set
 
@@ -112,7 +164,7 @@ def find_sub_reqs(html, is_branch_head, parent_req = None):
         sideways_traversal(html, parent_req)
 
     # Get the first list item in the html
-    li_child = html.find("li", recursive=True)
+    li_child = bfs_find(html, target_tags = ["li"])
 
     # When we're not at the root node
     if parent_req is not None:
@@ -129,16 +181,53 @@ def find_sub_reqs(html, is_branch_head, parent_req = None):
 
             # Go down until we find the last level, every time we go down the node we visit is the head
 
-            find_sub_reqs(li_child, True, parent_req=current_req)
+            find_sub_reqs_revision(li_child, True, parent_req=current_req)
             parent_req.add_to_sub_reqs(current_req)
 
             return
+    # Parent req is only none when we're at the root node
     else:
         if li_child is not None:
-            find_sub_reqs(li_child, True, parent_req=current_req)
+            find_sub_reqs_revision(li_child, True, parent_req=current_req)
     return current_req
 
+    pass
 
+
+# searches by tag name/ html id to avoid same level error
+def bfs_find(html: bs4.BeautifulSoup, target_tags: [] = ["li", "ul"]):
+    to_visit = []
+    to_visit.append(html)
+    current_level_items = 0
+    global visited_set
+
+    # visited = set()
+    # It may be the case that the li or ul is not the first elenent in the tree structure
+    # In such a case we want to get both next and prev siblings for sideways traver    while len(to_visit) > 0:
+    current = to_visit.pop(0)
+    to_visit.extend(current.find_all(recursive=False))
+    while len(to_visit) > 0:
+        current = to_visit.pop(0)
+
+        # When we have found the first li, or ul return it
+        if current.name in target_tags:
+            # print(current)
+            return current
+        # elif current.name == "li":
+        #     pass
+
+        visited_set.add(current)
+        potential_next = (current.find_all(recursive=False))
+
+        for item in potential_next:
+            if item not in visited_set:
+                to_visit.append(item)
+
+
+    pass
+
+
+# First check if there are any list elements or unordered lists in the current layer, at the first sight of one return list of elements
 def resolve_tree(html, level):
     # print(html)
     possible_subs = html.find_all(recursive=False)
@@ -148,47 +237,68 @@ def resolve_tree(html, level):
     # Check in same level first
     for i in range(0, len(possible_subs)):
         sub = possible_subs[i]
-        print(sub)
-        if sub.find("li") is None:
-            print("No sub lists")
-            continue
+        # print(sub)
+
+        # Is the current list element a list? if so return that element along with the level it was found at
         if sub.name in ["ul", "li"]:
             list_under = True
-            list_is.append(i)
-            return level
+            # list_is.append(i)
+            # print("There's a list somewhere")
+
+            return level, sub
             # Stop at the first list in level
             break
-            print("There's a list somewhere")
 
+        # If there is no list element anywhere down the tree then drop the element.
+        if sub.find("li") is None:
+            # print("No sub lists")
+            continue
+        else:
+            list_is.append(i)
 
+        optimal_lis = []
+    for ele in list_is:
+        optimal_lis.append(ele)
+        # print(f"HH {ele}")
+    # return resolve_tree()
 
-
-    print("\n\n")
+    # print("\n\n")
 
     pass
+
 
 ''' Looks at sibling requirements in the same 'level' as current requirements
     @:argument
     html: BeautifulSoup object that represents the 'head' of a level
     parent_req: The parent of the prerequisites in the same level. Each level has 1 parent at most
 '''
-def sideways_traversal(html, parent_req=None):
 
+
+def sideways_traversal(html, parent_req=None):
     siblings = html.find_next_siblings()
+    if siblings is not None:
+        siblings.extend(html.find_previous_siblings())
+    else:
+        siblings = html.find_previous_siblings()
 
     if siblings is not None and len(siblings) > 0:
         for element in siblings:
             new_element = element
-            if new_element.name != "li":
+            if new_element.name != "li" and new_element.name != "ul":
+                # print(f"sideways {new_element}")
                 new_element = new_element.find("li")
-            find_sub_reqs(new_element, False, parent_req)
-
-
+                if new_element is None:
+                    continue
+            # if new_element == None:
+            #     new_element = new_element.find("ul")
+            find_sub_reqs_revision(new_element, False, parent_req)
 
 
 '''
 Prepares a map for writing to a JSON file 
 '''
+
+
 def get_data(source_html) -> dict:
     # Start up beautiful soup and create a dictionary for holding different fields on the site
     soup = BeautifulSoup(source_html, "lxml")
@@ -210,12 +320,10 @@ def get_data(source_html) -> dict:
     department = None
     units = None
 
-
     if "Units" in infomap.keys():
         units = get_class_units(infomap["Units"])
     # Get the class code and class name
     class_code_title_map = get_class_name(soup.find("title"))
-
 
     if "Hours: lecture-lab-tutorial" in infomap.keys():
         hours = get_class_hours(infomap["Hours: lecture-lab-tutorial"])
@@ -235,7 +343,7 @@ def get_data(source_html) -> dict:
     if "Prerequisites" in infomap.keys():
         total_pre_reqs = infomap["Prerequisites"].find("ul", recursive=True)
         req = (find_sub_reqs_wrapper(total_pre_reqs).return_info())
-        #print(req)
+        # print(req)
 
     # Map of information of a class
     final_info_map = {
@@ -250,7 +358,7 @@ def get_data(source_html) -> dict:
 
         "prereqs": req,
         # Not every course has coreqs so initialize as empty map first
-        "coreqs": coreqs#,
+        "coreqs": coreqs  # ,
         # "prereqCourses": req_course_list
 
     }
@@ -270,7 +378,7 @@ def get_data(source_html) -> dict:
 def get_class_notes(source_soup) -> list:
     notes_list_head = source_soup.find("li")
     notes_lost = []
-    #for thing in notes_list_head.next_siblings:
+    # for thing in notes_list_head.next_siblings:
 
 
 def get_class_description(description) -> str:
@@ -282,10 +390,8 @@ def get_class_code(soup):
     return utilities.fetch_course_code(class_name_region)
 
 
-
 # Returns a map with class code and description
 def get_class_name(class_name_region) -> dict:
-
     if class_name_region is not None:
         source_text = class_name_region.text
         split = re.split(proper_title_pattern, source_text)
@@ -296,7 +402,7 @@ def get_class_name(class_name_region) -> dict:
 
     else:
         1
-        #We want to throw an error here and have handling function handle it
+        # We want to throw an error here and have handling function handle it
     '''if class_name_region is None:
         return
         #class_name_region = soup.find(ass="course-view__itemTitleAndTranslationButton___36N-_"><div><h2>ECE457 - Parallel and Cluster Computing</h2></div><div class="course-view__translationButtonContainer___1Srg0")
@@ -353,6 +459,7 @@ def get_class_units(soup):
 def get_departments(soup) -> str():
     return soup.find("div").text
 
+
 # Saves all class info from pregened html files
 def save_all_class_info():
     with open("results.json", "w", encoding="ASCII") as results_file:
@@ -362,12 +469,10 @@ def save_all_class_info():
         for filename in os.listdir("."):
             # print(filename)
             with open(filename, 'r', encoding="utf8") as html_file:
-
-
-                #print(filename)
+                # print(filename)
                 class_dict = get_data(html_file)
                 list_of_class_maps.append(class_dict)
-        #print(count)
+        # print(count)
         os.chdir("..")
         json.dump(list_of_class_maps, results_file, indent=2)
 
@@ -386,11 +491,13 @@ def save_class_info_inplace():
         json.dump(list_of_class_maps, results_file, indent=2)
 
 
+# fi = open('HTML/Current=CSC110%20-%20Fundamentals%20of%20Programming%20I&bcGroup=Computer%20Science%20')
+# class_dict = get_data(fi)
+# with open("new_res", "w") as results_file:
+#     json.dump(class_dict, results_file, indent=2)
 
-fi = open('HTML/Current=CSC110%20-%20Fundamentals%20of%20Programming%20I&bcGroup=Computer%20Science%20')
-class_dict = get_data(fi)
-print(class_dict)
-# save_all_class_info()
+# print(class_dict)
+save_all_class_info()
 # save_class_info_inplace()
 # re.search("\d+\\.*\d*
 # units of", "4.5 units of 300- or 400-level GNDR or WS courses")
